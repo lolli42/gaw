@@ -1,0 +1,15 @@
+<f:layout name="Default" />
+
+<f:section name="Title">A list of planets</f:section>
+
+<f:section name="Content">
+	<f:then>
+		<ul>
+			<f:for each="{planets}" as="planet">
+				<li>
+					<f:link.action action="show" arguments="{planet: planet}">{planet.name}</f:link.action>
+				</li>
+			</f:for>
+		</ul>
+	</f:then>
+</f:section>

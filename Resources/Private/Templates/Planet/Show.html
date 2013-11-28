@@ -1,0 +1,33 @@
+<f:layout name="Default" />
+
+<f:section name="Title">Show planet"{planet.name}"</f:section>
+
+<f:section name="Content">
+	<table>
+		<tr>
+			<th>In Bau</th>
+			<td>{planet.structureInProgress}</td>
+			<td>
+				<f:if condition="{planet.structureReadyTime}">
+					<f:format.date forceLocale="de_DE" format="H:i:s">
+						<f:format.printf arguments="{0: planet.structureReadyTime}">@%1$d</f:format.printf>
+					</f:format.date>
+				</f:if>
+			</td>
+		</tr>
+		<tr>
+			<f:form action="renamePlanet" object="{planet}" objectName="planet">
+				<th>Name</th>
+				<td><f:form.textfield property="name" id="name" /></td>
+				<td><f:form.submit value="Umbenennen" /></td>
+			</f:form>
+		</tr>
+		<tr>
+			<f:form action="buildBase" object="{planet}" objectName="planet">
+				<th>Basis</th>
+				<td>{planet.base}</td>
+				<td><f:form.submit value="Ausbauen" /></td>
+			</f:form>
+		</tr>
+	</table>
+</f:section>

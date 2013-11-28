@@ -1,0 +1,6 @@
+Lolli:
+  Gaw:
+    Redis:
+      hostname: 'localhost'
+      port: 6379
+      database: 7
