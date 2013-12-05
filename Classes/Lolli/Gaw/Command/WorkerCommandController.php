@@ -15,9 +15,9 @@ class WorkerCommandController extends \TYPO3\Flow\Cli\CommandController {
 
 	/**
 	 * @Flow\Inject
-	 * @var \Lolli\Gaw\Redis\RedisWorker
+	 * @var \Lolli\Gaw\Redis\WorkerFacade
 	 */
-	protected $redis;
+	protected $redisFacade;
 
 	/**
 	 * @Flow\Inject
@@ -44,18 +44,15 @@ class WorkerCommandController extends \TYPO3\Flow\Cli\CommandController {
 	 */
 	public function runCommand() {
 		while (TRUE) {
-			$job = $this->redis->blPop('toExecute', 0);
-			$job = $job[1];
-			var_dump($job);
-			$jobArray = json_decode($job, TRUE);
+			$job = $this->redisFacade->waitForJob();
+			$jobArray = $this->redisFacade->getJobArray($job);
 			var_dump($jobArray);
 			$command = $jobArray['command'];
 			$result = $this->$command($jobArray['data']);
 			if (!empty($jobArray['data']['clientBlockingOn'])) {
-				// @TODO: format to give back also json?!
-				$this->redis->rPush($jobArray['data']['clientBlockingOn'], $result);
+				$this->redisFacade->pushClientFeedback($jobArray['data']['clientBlockingOn'], $result);
 			}
-			$this->redis->rPush('executed', $job);
+			$this->redisFacade->notifyDispatcherJobCompleted($job);
 		}
 	}
 
@@ -70,7 +67,7 @@ class WorkerCommandController extends \TYPO3\Flow\Cli\CommandController {
 			'planetNumber' => $planet->getPlanetNumber(),
 			'time' => $readyTime,
 		);
-		$this->redis->scheduleDelayedJob('doneBuildBase', array($planet->getPlanetPositionString()), $doneBuildBaseData);
+		$this->redisFacade->scheduleDelayedJob('doneBuildBase', array($planet->getPlanetPositionString()), $doneBuildBaseData);
 		$planet->setStructureInProgress(1);
 		$planet->setStructureReadyTime($readyTime);
 		$this->planetRepository->update($planet);

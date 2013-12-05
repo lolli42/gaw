@@ -8,28 +8,7 @@ use TYPO3\Flow\Annotations as Flow;
  *
  * @Flow\Scope("singleton")
  */
-class RedisClient extends Redis {
-
-	/**
-	 * inject and initialize are not in base class because of issue http://forge.typo3.org/issues/53180
-	 */
-
-	/**
-	 * @param array $settings
-	 */
-	public function injectSettings(array $settings) {
-		$this->settings = $settings;
-	}
-
-	/**
-	 * @return Redis
-	 */
-	public function initializeObject() {
-		$this->connect($this->settings['Redis']['hostname'], $this->settings['Redis']['port']);
-		$this->select($this->settings['Redis']['database']);
-		return $this;
-	}
-
+class ClientFacade extends RedisFacade {
 
 	public function scheduleNowJob($command, array $tags, array $data) {
 		// @TODO: should probably throw exceptions
@@ -45,8 +24,8 @@ class RedisClient extends Redis {
 				'data' => $data,
 			)
 		);
-		$this->zAdd('scheduled', $time, $dataString);
-		$this->rPush('dispatch', TRUE);
+		$this->redis->zAdd('scheduled', $time, $dataString);
+		$this->redis->rPush('dispatch', TRUE);
 		return TRUE;
 	}
 
@@ -56,7 +35,7 @@ class RedisClient extends Redis {
 		$data['clientBlockingOn'] = $clientBlocking;
 		$this->scheduleNowJob($command, $tags, $data);
 		$result = TRUE;
-		$feedback = $this->blPop($clientBlocking, 2);
+		$feedback = $this->redis->blPop($clientBlocking, 2);
 		if (count($feedback) === 0) {
 			$result = FALSE;
 		}
@@ -70,10 +49,10 @@ class RedisClient extends Redis {
 	 * @return bool TRUE if system is up
 	 */
 	protected function testDispatcherIsRunning() {
-		$this->multi();
-		$this->get('realTime');
-		$this->time();
-		$result = $this->exec();
+		$this->redis->multi();
+		$this->redis->get('realTime');
+		$this->redis->time();
+		$result = $this->redis->exec();
 		$now = $this->redisTimeToMicroseconds($result[1]);
 		// 10 seconds
 		if ($now - $result[0] > 10000000) {

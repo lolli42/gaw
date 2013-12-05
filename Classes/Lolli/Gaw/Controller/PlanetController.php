@@ -14,9 +14,9 @@ class PlanetController extends ActionController {
 
 	/**
 	 * @Flow\Inject
-	 * @var \Lolli\Gaw\Redis\RedisClient
+	 * @var \Lolli\Gaw\Redis\ClientFacade
 	 */
-	protected $redis;
+	protected $redisFacade;
 
 	/**
 	 * @Flow\Inject
@@ -45,7 +45,7 @@ class PlanetController extends ActionController {
 			'systemNumber' => $planet->getSystemNumber(),
 			'planetNumber' => $planet->getPlanetNumber(),
 		);
-		$success = $this->redis->scheduleBlockingJob('beginBuildBase', array($planet->getPlanetPositionString()), $data);
+		$success = $this->redisFacade->scheduleBlockingJob('beginBuildBase', array($planet->getPlanetPositionString()), $data);
 		if ($success) {
 			$this->addFlashMessage('build the planet.');
 		} else {
