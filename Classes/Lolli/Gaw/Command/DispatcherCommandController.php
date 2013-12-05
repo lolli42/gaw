@@ -46,8 +46,8 @@ class DispatcherCommandController extends \TYPO3\Flow\Cli\CommandController {
 	 */
 	protected function mainLoop() {
 		$redis = $this->redisFacade->getRedis();
-		$redis->del('toExecute');
-		$redis->del('executed');
+		$redis->del('lolli:gaw:toExecute');
+		$redis->del('lolli:gaw:executed');
 
 		// @TODO: if all scheduled jobs information is also persisted in database,
 		// the only *important* info that can not be re-constructed after redis-failure
@@ -60,7 +60,7 @@ class DispatcherCommandController extends \TYPO3\Flow\Cli\CommandController {
 			var_dump('new game time: ' . $newGameTime);
 
 			// Get list ob jobs ready to execute from schedule queue and push to worker list
-			$executeJobCandidates = $redis->zRangeByScore('scheduled', 0, $newGameTime);
+			$executeJobCandidates = $redis->zRangeByScore('lolli:gaw:mainQueue', 0, $newGameTime);
 			$numberOfToExecuteJobs = 0;
 			$tagsOfCurrentBatch = array();
 			$toExecuteJobs = array();
@@ -70,8 +70,8 @@ class DispatcherCommandController extends \TYPO3\Flow\Cli\CommandController {
 				// In case multiple clients pushed meanwhile, just clear out the list to prepare next run.
 				// If no client does something, wait for timeout and continue with next loop.
 				// This can not be made atomic, since blocking pop does not work in multi/exec.
-				$redis->blPop('dispatch', 1);
-				$redis->del('dispatch');
+				$redis->blPop('lolli:gaw:triggerDispatcher', 1);
+				$redis->del('lolli:gaw:triggerDispatcher');
 			} else {
 				foreach ($executeJobCandidates as $executeJobCandidate) {
 					$jobArray = json_decode($executeJobCandidate, TRUE);
@@ -89,8 +89,8 @@ class DispatcherCommandController extends \TYPO3\Flow\Cli\CommandController {
 						);
 						$numberOfToExecuteJobs++;
 						$toExecuteJobs[] = $executeJobCandidate;
-						$redis->rPush('toExecute', $executeJobCandidate);
-						$redis->zrem('scheduled', $executeJobCandidate);
+						$redis->rPush('lolli:gaw:toExecute', $executeJobCandidate);
+						$redis->zrem('lolli:gaw:mainQueue', $executeJobCandidate);
 					}
 				}
 				var_dump("$numberOfToExecuteJobs jobs to execute");
@@ -103,7 +103,7 @@ class DispatcherCommandController extends \TYPO3\Flow\Cli\CommandController {
 				$aJobFailed = FALSE;
 				while ($numberOfExecutedJobs < $numberOfToExecuteJobs) {
 					// If no job got ready after 2 seconds, assume at least one failed
-					$executedJob = $redis->blPop('executed', 2);
+					$executedJob = $redis->blPop('lolli:gaw:executed', 2);
 					$numberOfExecutedJobs++;
 					if (count($executedJob) === 0) {
 						// Timeout
@@ -118,7 +118,7 @@ class DispatcherCommandController extends \TYPO3\Flow\Cli\CommandController {
 					$failedJobs = array_diff($toExecuteJobs, $executedJobs);
 					foreach ($failedJobs as $failedJob) {
 						$jobArray = json_decode($failedJob, TRUE);
-						$redis->zAdd('scheduled', $jobArray['data']['time'], $failedJob);
+						$redis->zAdd('lolli:gaw:mainQueue', $jobArray['data']['time'], $failedJob);
 					}
 					// @TODO: throw exeption?
 					$stopDispatcher = TRUE;
@@ -137,7 +137,7 @@ class DispatcherCommandController extends \TYPO3\Flow\Cli\CommandController {
 	protected function incrementGameTimeByElapsedRealTime() {
 		$redis = $this->redisFacade->getRedis();
 		$redis->multi();
-		$redis->get('realTime');
+		$redis->get('lolli:gaw:realTime');
 		$redis->time();
 		$result = $redis->exec();
 
@@ -147,8 +147,8 @@ class DispatcherCommandController extends \TYPO3\Flow\Cli\CommandController {
 		$elapsedTime = $realTime - $lastRealTime;
 
 		$redis->multi();
-		$redis->set('realTime', $realTime);
-		$redis->incrBy('gameTime', $elapsedTime);
+		$redis->set('lolli:gaw:realTime', $realTime);
+		$redis->incrBy('lolli:gaw:gameTime', $elapsedTime);
 		$result = $redis->exec();
 
 		return (int) $result[1];
@@ -164,12 +164,12 @@ class DispatcherCommandController extends \TYPO3\Flow\Cli\CommandController {
 	protected function setUpGameTime() {
 		$redis = $this->redisFacade->getRedis();
 		// Set game time to 0 if not set, specifies very first start of game
-		$gameTime = $redis->get('gameTime');
+		$gameTime = $redis->get('lolli:gaw:gameTime');
 		if ($gameTime === FALSE) {
-			$redis->set('gameTime', 0);
+			$redis->set('lolli:gaw:gameTime', 0);
 		}
 
 		$secondsAndMicroSeconds = $redis->time();
-		$redis->set('realTime', $this->redisFacade->redisTimeToMicroseconds($secondsAndMicroSeconds));
+		$redis->set('lolli:gaw:realTime', $this->redisFacade->redisTimeToMicroseconds($secondsAndMicroSeconds));
 	}
 }

@@ -14,7 +14,7 @@ class WorkerFacade extends RedisFacade {
 	 * @return array
 	 */
 	public function waitForJob() {
-		return $this->redis->blPop('toExecute', 0);
+		return $this->redis->blPop('lolli:gaw:toExecute', 0);
 	}
 
 	public function getJobArray($job) {
@@ -28,7 +28,7 @@ class WorkerFacade extends RedisFacade {
 	}
 
 	public function notifyDispatcherJobCompleted(array $job) {
-		$this->redis->rPush('executed', $job);
+		$this->redis->rPush('lolli:gaw:executed', $job);
 	}
 
 	/**
@@ -47,6 +47,6 @@ class WorkerFacade extends RedisFacade {
 				'data' => $data
 			)
 		);
-		$this->redis->zAdd('scheduled', $data['time'], $dataString);
+		$this->redis->zAdd('lolli:gaw:mainQueue', $data['time'], $dataString);
 	}
 }

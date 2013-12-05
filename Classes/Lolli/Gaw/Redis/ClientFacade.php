@@ -24,14 +24,14 @@ class ClientFacade extends RedisFacade {
 				'data' => $data,
 			)
 		);
-		$this->redis->zAdd('scheduled', $time, $dataString);
-		$this->redis->rPush('dispatch', TRUE);
+		$this->redis->zAdd('lolli:gaw:mainQueue', $time, $dataString);
+		$this->redis->rPush('lolli:gaw:triggerDispatcher', TRUE);
 		return TRUE;
 	}
 
 	public function scheduleBlockingJob($command, array $tags, array $data) {
 		// @TODO: should probably throw exceptions, also overwrites true/false from now() method
-		$clientBlocking = uniqid('client:Blocking:');
+		$clientBlocking = uniqid('lolli:gaw:client:blocking:');
 		$data['clientBlockingOn'] = $clientBlocking;
 		$this->scheduleNowJob($command, $tags, $data);
 		$result = TRUE;
@@ -50,7 +50,7 @@ class ClientFacade extends RedisFacade {
 	 */
 	protected function testDispatcherIsRunning() {
 		$this->redis->multi();
-		$this->redis->get('realTime');
+		$this->redis->get('lolli:gaw:realTime');
 		$this->redis->time();
 		$result = $this->redis->exec();
 		$now = $this->redisTimeToMicroseconds($result[1]);

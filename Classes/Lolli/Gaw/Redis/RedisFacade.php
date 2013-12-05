@@ -50,9 +50,9 @@ class RedisFacade {
 	 */
 	protected function getGameTimeNow() {
 		$this->redis->multi();
-		$this->redis->get('realTime');
+		$this->redis->get('lolli:gaw:realTime');
 		$this->redis->time();
-		$this->redis->get('gameTime');
+		$this->redis->get('lolli:gaw:gameTime');
 		$result = $this->redis->exec();
 
 		$lastRealTime = $result[0];
