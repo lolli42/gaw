@@ -17,7 +17,7 @@ class WorkerFacade extends RedisFacade {
 		return $this->redis->blPop('lolli:gaw:toExecute', 0);
 	}
 
-	public function getJobArray($job) {
+	public function getJobArrayFromJob($job) {
 		$jobArray = $job[1];
 		return json_decode($jobArray, TRUE);
 	}
@@ -35,18 +35,9 @@ class WorkerFacade extends RedisFacade {
 	 * Schedule a job for "later"
 	 * Time when job should be executed must be set in $data['time']
 	 *
-	 * @param $command
-	 * @param array $tags
 	 * @param array $data
 	 */
-	public function scheduleDelayedJob($command, array $tags, array $data) {
-		$dataString = json_encode(
-			array(
-				'command' => $command,
-				'tags' => $tags,
-				'data' => $data
-			)
-		);
-		$this->redis->zAdd('lolli:gaw:mainQueue', $data['time'], $dataString);
+	public function scheduleDelayedJob(array $data) {
+		$this->redis->zAdd('lolli:gaw:mainQueue', $data['time'], json_encode($data));
 	}
 }

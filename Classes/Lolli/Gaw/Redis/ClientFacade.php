@@ -10,36 +10,29 @@ use TYPO3\Flow\Annotations as Flow;
  */
 class ClientFacade extends RedisFacade {
 
-	public function scheduleNowJob($command, array $tags, array $data) {
-		// @TODO: should probably throw exceptions
-		if (!$this->testDispatcherIsRunning()) {
-			return FALSE;
-		}
-		$time = $this->getGameTimeNow();
-		$data['time'] = $time;
-		$dataString = json_encode(
-			array(
-				'command' => $command,
-				'tags' => $tags,
-				'data' => $data,
-			)
-		);
-		$this->redis->zAdd('lolli:gaw:mainQueue', $time, $dataString);
-		$this->redis->rPush('lolli:gaw:triggerDispatcher', TRUE);
-		return TRUE;
-	}
-
-	public function scheduleBlockingJob($command, array $tags, array $data) {
+	public function scheduleBlockingJob(array $data) {
 		// @TODO: should probably throw exceptions, also overwrites true/false from now() method
 		$clientBlocking = uniqid('lolli:gaw:client:blocking:');
 		$data['clientBlockingOn'] = $clientBlocking;
-		$this->scheduleNowJob($command, $tags, $data);
+		$this->scheduleNowJob($data);
 		$result = TRUE;
 		$feedback = $this->redis->blPop($clientBlocking, 2);
 		if (count($feedback) === 0) {
 			$result = FALSE;
 		}
 		return $result;
+	}
+
+	public function scheduleNowJob(array $data) {
+		// @TODO: should probably throw exceptions
+		if (!$this->testDispatcherIsRunning()) {
+			return FALSE;
+		}
+		$time = $this->getGameTimeNow();
+		$data['time'] = $time;
+		$this->redis->zAdd('lolli:gaw:mainQueue', $time, json_encode($data));
+		$this->redis->rPush('lolli:gaw:triggerDispatcher', TRUE);
+		return TRUE;
 	}
 
 	/**

@@ -41,11 +41,13 @@ class PlanetController extends ActionController {
 
 	public function buildBaseAction(Planet $planet) {
 		$data = array(
+			'command' => 'beginBuildBase',
+			'tags' => array($planet->getPlanetPositionString()),
 			'galaxyNumber' => $planet->getGalaxyNumber(),
 			'systemNumber' => $planet->getSystemNumber(),
 			'planetNumber' => $planet->getPlanetNumber(),
 		);
-		$success = $this->redisFacade->scheduleBlockingJob('beginBuildBase', array($planet->getPlanetPositionString()), $data);
+		$success = $this->redisFacade->scheduleBlockingJob($data);
 		if ($success) {
 			$this->addFlashMessage('build the planet.');
 		} else {

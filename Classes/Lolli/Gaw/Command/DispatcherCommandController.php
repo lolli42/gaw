@@ -118,7 +118,7 @@ class DispatcherCommandController extends \TYPO3\Flow\Cli\CommandController {
 					$failedJobs = array_diff($toExecuteJobs, $executedJobs);
 					foreach ($failedJobs as $failedJob) {
 						$jobArray = json_decode($failedJob, TRUE);
-						$redis->zAdd('lolli:gaw:mainQueue', $jobArray['data']['time'], $failedJob);
+						$redis->zAdd('lolli:gaw:mainQueue', $jobArray['time'], $failedJob);
 					}
 					// @TODO: throw exeption?
 					$stopDispatcher = TRUE;

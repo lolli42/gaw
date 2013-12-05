@@ -45,12 +45,12 @@ class WorkerCommandController extends \TYPO3\Flow\Cli\CommandController {
 	public function runCommand() {
 		while (TRUE) {
 			$job = $this->redisFacade->waitForJob();
-			$jobArray = $this->redisFacade->getJobArray($job);
+			$jobArray = $this->redisFacade->getJobArrayFromJob($job);
 			var_dump($jobArray);
 			$command = $jobArray['command'];
-			$result = $this->$command($jobArray['data']);
-			if (!empty($jobArray['data']['clientBlockingOn'])) {
-				$this->redisFacade->pushClientFeedback($jobArray['data']['clientBlockingOn'], $result);
+			$result = $this->$command($jobArray);
+			if (!empty($jobArray['clientBlockingOn'])) {
+				$this->redisFacade->pushClientFeedback($jobArray['clientBlockingOn'], $result);
 			}
 			$this->redisFacade->notifyDispatcherJobCompleted($job);
 		}
@@ -62,12 +62,14 @@ class WorkerCommandController extends \TYPO3\Flow\Cli\CommandController {
 		$delay = $this->planetCalculationService->getBaseBuildTime($planet);
 		$readyTime = $data['time'] + $delay;
 		$doneBuildBaseData = array(
+			'command' => 'doneBuildBase',
+			'tags' => array($planet->getPlanetPositionString()),
+			'time' => $readyTime,
 			'galaxyNumber' => $planet->getGalaxyNumber(),
 			'systemNumber' => $planet->getSystemNumber(),
 			'planetNumber' => $planet->getPlanetNumber(),
-			'time' => $readyTime,
 		);
-		$this->redisFacade->scheduleDelayedJob('doneBuildBase', array($planet->getPlanetPositionString()), $doneBuildBaseData);
+		$this->redisFacade->scheduleDelayedJob($doneBuildBaseData);
 		$planet->setStructureInProgress(1);
 		$planet->setStructureReadyTime($readyTime);
 		$this->planetRepository->update($planet);
