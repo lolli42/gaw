@@ -1,0 +1,80 @@
+<f:layout name="Default" />
+
+<f:section name="Title">Galaxie {galaxy}:{system}</f:section>
+
+<f:section name="Content">
+	<f:form action="index">
+		<div class="row">
+			<div class="large-2 columns">
+				<label>Galaxie:</label>
+				<f:form.textfield name="galaxy" />
+			</div>
+			<div class="large-2 columns">
+				<f:form.submit value="Go" />
+			</div>
+			<div class="large-2 columns">
+				<label>System:</label>
+				<f:form.textfield name="system" />
+			</div>
+		</div>
+	</f:form>
+
+	<ul class="button-group">
+		<li>
+			<f:if condition="{previousGalaxy}">
+				<f:link.action class="button" action="index" arguments="{galaxy: previousGalaxy, system: system}">{previousGalaxy}</f:link.action>
+			</f:if>
+		</li>
+		<li>
+			Galaxie
+		</li>
+		<li>
+			<f:if condition="{nextGalaxy}">
+				<f:link.action class="button" action="index" arguments="{galaxy: nextGalaxy, system: system}">{nextGalaxy}</f:link.action>
+			</f:if>
+		</li>
+	</ul>
+
+	<ul class="button-group">
+		<li>
+			<f:if condition="{previousSystem}">
+				<f:link.action class="button" action="index" arguments="{galaxy: galaxy, system: previousSystem}">{previousSystem}</f:link.action>
+			</f:if>
+		</li>
+		<li>
+			System
+		</li>
+		<li>
+			<f:if condition="{nextSystem}">
+				<f:link.action class="button" action="index" arguments="{galaxy: galaxy, system: nextSystem}">{nextSystem}</f:link.action>
+			</f:if>
+		</li>
+	</ul>
+
+	<table>
+		<thead>
+			<tr>
+				<th>
+					Nummer
+				</th>
+				<th>
+					Name
+				</th>
+			</tr>
+		</thead>
+		<tbody>
+			<f:for each="{planets}" as="planet" key="number">
+				<tr>
+					<td>
+						{number}
+					</td>
+					<td>
+						<f:if condition="{planet.name}">
+							{planet.name}
+						</f:if>
+					</td>
+				</tr>
+			</f:for>
+		</tbody>
+	</table>
+</f:section>

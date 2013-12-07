@@ -1,8 +1,8 @@
 <?php
-namespace Lolli\Gaw\Command;
+namespace Lolli\Gaw\Controller;
 
 /**
- * Generic exception
+ * Generic controller exception
  */
 class Exception extends \Lolli\Gaw\Exception {
 

@@ -57,8 +57,4 @@ class PlanetController extends ActionController {
 		// thus fetches updated planet from persistence
 		$this->redirect('show', NULL, NULL, array('planet' => $planet));
 	}
-
-
 }
-
-?>

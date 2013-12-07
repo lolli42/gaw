@@ -36,5 +36,27 @@ class PlanetRepository extends Repository {
 			->getFirst();
 	}
 
+	/**
+	 * Find all planets in a galaxy system
+	 *
+	 * @param $galaxy
+	 * @param $system
+	 * @return \TYPO3\Flow\Persistence\QueryResultInterface Planets
+	 */
+	public function findByGalaxyAndSystem($galaxy, $system) {
+		$query = $this->createQuery();
+		return $query
+			->matching(
+				$query->logicalAnd(
+					$query->equals('galaxyNumber', $galaxy),
+					$query->equals('systemNumber', $system)
+				)
+			)
+			->setOrderings(
+				array(
+					'systemNumber' => \TYPO3\Flow\Persistence\QueryInterface::ORDER_ASCENDING,
+				)
+			)
+			->execute();
+	}
 }
-?>
