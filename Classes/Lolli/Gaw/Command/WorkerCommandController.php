@@ -14,6 +14,8 @@ namespace Lolli\Gaw\Command;
 use TYPO3\Flow\Annotations as Flow;
 
 /**
+ * Game worker
+ *
  * @Flow\Scope("singleton")
  */
 class WorkerCommandController extends \TYPO3\Flow\Cli\CommandController {

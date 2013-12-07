@@ -4,3 +4,20 @@ Lolli:
       hostname: 'localhost'
       port: 6379
       database: 7
+    Controller:
+      Login:
+        Redirect:
+          login:
+            actionName: index
+            controllerName: Planet
+          logout:
+            actionName: index
+            controllerName: Authentication
+
+TYPO3:
+  Flow:
+    security:
+      authentication:
+        providers:
+          DefaultProvider:
+            provider: PersistedUsernamePasswordProvider

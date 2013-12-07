@@ -1,0 +1,27 @@
+<f:layout name="Default" />
+
+<f:section name="Title">Login</f:section>
+
+<f:section name="Content">
+	<f:form name="login" method="post" action="authenticate">
+		<div class="row">
+			<div class="large-3 columns">
+				<label>Spieler:</label>
+				<f:form.textfield
+					name="__authentication[TYPO3][Flow][Security][Authentication][Token][UsernamePassword][username]"
+					value=""
+				/>
+			</div>
+			<div class="large-3 columns">
+				<label>Passwort:</label>
+				<f:form.textfield
+					name="__authentication[TYPO3][Flow][Security][Authentication][Token][UsernamePassword][password]"
+					value=""
+				/>
+			</div>
+			<div class="large-3 columns">
+				<f:form.submit value="Login" />
+			</div>
+		</div>
+	</f:form>
+</f:section>

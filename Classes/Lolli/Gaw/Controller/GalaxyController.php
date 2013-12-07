@@ -13,6 +13,11 @@ namespace Lolli\Gaw\Controller;
 
 use TYPO3\Flow\Annotations as Flow;
 
+/**
+ * Show system in a galaxy
+ *
+ * @Flow\Scope("singleton")
+ */
 class GalaxyController extends \TYPO3\Flow\Mvc\Controller\ActionController {
 
 	/**

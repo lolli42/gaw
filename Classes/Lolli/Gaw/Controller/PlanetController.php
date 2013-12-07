@@ -12,10 +12,14 @@ namespace Lolli\Gaw\Controller;
  *                                                                        */
 
 use TYPO3\Flow\Annotations as Flow;
-use TYPO3\Flow\Mvc\Controller\ActionController;
 use Lolli\Gaw\Domain\Model\Planet;
 
-class PlanetController extends ActionController {
+/**
+ * Planet controller
+ *
+ * @Flow\Scope("singleton")
+ */
+class PlanetController extends \TYPO3\Flow\Mvc\Controller\ActionController {
 
 	/**
 	 * @Flow\Inject
