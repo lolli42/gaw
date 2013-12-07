@@ -31,6 +31,7 @@ class DispatcherCommandController extends \TYPO3\Flow\Cli\CommandController {
 	 */
 	public function initializeObject() {
 		// @TODO: check php.ini default_socket_timeout = -1
+		// @TODO: PHP-wtf: setting default_socket_timeout = -1 lets file_get_contents() fail on https (composer)
 	}
 
 	/**
