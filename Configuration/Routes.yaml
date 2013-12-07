@@ -1,0 +1,7 @@
+-
+  name: 'Login'
+  uriPattern: ''
+  defaults:
+    '@package': 'Lolli.Gaw'
+    '@controller': 'Authentication'
+    '@action': 'index'
