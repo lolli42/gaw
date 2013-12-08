@@ -37,6 +37,6 @@ class PlayerController extends \TYPO3\Flow\Mvc\Controller\ActionController {
 	 */
 	public function selectPlanetAction(\Lolli\Gaw\Domain\Model\Player $player) {
 		$this->playerRepository->update($player);
-		$this->redirect('index', 'planet');
+		$this->redirect('index', 'planetBuilding');
 	}
 }

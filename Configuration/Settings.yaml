@@ -9,7 +9,7 @@ Lolli:
         Redirect:
           login:
             actionName: index
-            controllerName: Planet
+            controllerName: PlanetBuilding
           logout:
             actionName: index
             controllerName: Authentication

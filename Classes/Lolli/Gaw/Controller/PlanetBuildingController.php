@@ -15,11 +15,11 @@ use TYPO3\Flow\Annotations as Flow;
 use Lolli\Gaw\Domain\Model\Planet;
 
 /**
- * Planet controller
+ * Planet building controller
  *
  * @Flow\Scope("singleton")
  */
-class PlanetController extends \TYPO3\Flow\Mvc\Controller\ActionController {
+class PlanetBuildingController extends \TYPO3\Flow\Mvc\Controller\ActionController {
 
 	/**
 	 * @Flow\Inject
@@ -40,7 +40,7 @@ class PlanetController extends \TYPO3\Flow\Mvc\Controller\ActionController {
 	protected $planetRepository;
 
 	/**
-	 * @return void
+	 * Show planet buildings
 	 */
 	public function indexAction() {
 		/** @var \Lolli\Gaw\Domain\Model\Player $player */
@@ -49,23 +49,7 @@ class PlanetController extends \TYPO3\Flow\Mvc\Controller\ActionController {
 		$this->view->assignMultiple(
 			array(
 				'player' => $player,
-				'planets' => $this->planetRepository->findAll(),
-			)
-		);
-	}
-
-	/**
-	 * @param \Lolli\Gaw\Domain\Model\Planet $planet
-	 * @return void
-	 */
-	public function showAction(Planet $planet) {
-		/** @var \Lolli\Gaw\Domain\Model\Player $player */
-		$player = $this->securityContext->getPartyByType('Lolli\Gaw\Domain\Model\Player');
-
-		$this->view->assignMultiple(
-			array(
-				'player' => $player,
-				'planet' => $planet,
+				'planet' => $player->getSelectedPlanet(),
 			)
 		);
 	}
@@ -79,10 +63,10 @@ class PlanetController extends \TYPO3\Flow\Mvc\Controller\ActionController {
 			'planetNumber' => $planet->getPlanetNumber(),
 		);
 		$success = $this->redisFacade->scheduleBlockingJob($data);
-		$this->addFlashMessage('build the planet, ready time' . $success['readyTime']);
+		$this->addFlashMessage('Planet wird ausgebaut');
 
 		// difference between redirect and forward is here that redirect maps new and
 		// thus fetches updated planet from persistence
-		$this->redirect('show', NULL, NULL, array('planet' => $planet));
+		$this->redirect('index');
 	}
 }

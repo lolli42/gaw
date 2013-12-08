@@ -1,0 +1,48 @@
+<f:layout name="Game" />
+
+<f:section name="Title">
+	<f:if condition="{planet.name}">
+		<f:then>
+			Ausbau "{planet.name}"
+		</f:then>
+		<f:else>
+			Planetenausbau
+		</f:else>
+	</f:if>
+</f:section>
+
+<f:section name="Content">
+	<table>
+		<tr>
+			<th>In Bau</th>
+			<td>{planet.structureInProgress}</td>
+			<td>
+				<f:if condition="{planet.structureReadyTime}">
+					<f:format.date forceLocale="de_DE" format="H:i:s">
+						<f:format.printf arguments="{0: planet.structureReadyTime}">@%1$d</f:format.printf>
+					</f:format.date>
+				</f:if>
+			</td>
+		</tr>
+
+		<f:comment>
+			<tr>
+				<f:form action="renamePlanet" object="{planet}" objectName="planet">
+					<th>Name</th>
+					<td><f:form.textfield property="name" id="name" /></td>
+					<td><f:form.submit value="Umbenennen" /></td>
+				</f:form>
+			</tr>
+		</f:comment>
+
+		<tr>
+				<th>Basis</th>
+				<td>{planet.base}</td>
+				<td>
+					<f:form action="buildBase" object="{planet}" objectName="planet">
+						<f:form.submit value="Ausbauen" />
+					</f:form>
+				</td>
+		</tr>
+	</table>
+</f:section>
