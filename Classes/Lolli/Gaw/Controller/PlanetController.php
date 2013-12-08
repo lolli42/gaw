@@ -57,11 +57,8 @@ class PlanetController extends \TYPO3\Flow\Mvc\Controller\ActionController {
 			'planetNumber' => $planet->getPlanetNumber(),
 		);
 		$success = $this->redisFacade->scheduleBlockingJob($data);
-		if ($success) {
-			$this->addFlashMessage('build the planet.');
-		} else {
-			$this->addFlashMessage('dispatcher down or job took too long or worker gave no feedback');
-		}
+		$this->addFlashMessage('build the planet, ready time' . $success['readyTime']);
+
 		// difference between redirect and forward is here that redirect maps new and
 		// thus fetches updated planet from persistence
 		$this->redirect('show', NULL, NULL, array('planet' => $planet));

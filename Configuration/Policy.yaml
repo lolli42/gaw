@@ -6,6 +6,7 @@ resources:
     Lolli_Gaw_AllControllerActions: 'within(TYPO3\Flow\Mvc\Controller\AbstractController) && method(public .*->.*Action())'
 
     Lolli_Gaw_Login: 'method(Lolli\Gaw\Controller\AuthenticationController->(index|authenticate)Action())  || method(TYPO3\Flow\Security\Authentication\Controller\AbstractAuthenticationController->authenticateAction())'
+    Lolli_Gaw_Registration: 'method(Lolli\Gaw\Controller\RegistrationController->(index|register)Action())'
     Lolli_Gaw_Logout: 'method(Lolli\Gaw\Controller\AuthenticationController->logoutAction()) || method(TYPO3\Flow\Security\Authentication\Controller\AbstractAuthenticationController->logoutAction())'
 
     Lolli_Gaw_Game: 'method(public Lolli\Gaw\Controller\(Galaxy|Planet)Controller->.*Action())'
@@ -14,6 +15,7 @@ acls:
   Everybody:
     methods:
       Lolli_Gaw_Login: GRANT
+      Lolli_Gaw_Registration: GRANT
   Player:
     methods:
       Lolli_Gaw_Logout: GRANT

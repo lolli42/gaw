@@ -32,12 +32,11 @@ class WorkerFacade extends RedisFacade {
 		return json_decode($jobArray, TRUE);
 	}
 
-	public function pushClientFeedback($channel, $result) {
-		// @TODO: format to give back also json?!
-		$this->redis->rPush($channel, $result);
+	public function pushClientFeedback($channel, array $result) {
+		$this->redis->rPush($channel, json_encode($result));
 	}
 
-	public function notifyDispatcherJobCompleted(array $job) {
+	public function notifyDispatcherJobCompleted($job) {
 		$this->redis->rPush('lolli:gaw:executed', $job);
 	}
 

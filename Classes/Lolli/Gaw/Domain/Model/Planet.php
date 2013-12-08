@@ -16,11 +16,18 @@ use Doctrine\ORM\Mapping as ORM;
 
 /**
  * @Flow\Entity
+ * @Flow\Scope("prototype")
  */
 class Planet {
 
 	const STRUCTURE_NONE = 0;
 	const STRUCTURE_BASE = 1;
+
+	/**
+	 * @var \Lolli\Gaw\Domain\Model\Player
+	 * @ORM\ManyToOne(inversedBy="planets")
+	 */
+	protected $player;
 
 	/**
 	 * @var integer
@@ -56,6 +63,24 @@ class Planet {
 	 * @var integer
 	 */
 	protected $base = 0;
+
+	/**
+	 * Get corresponding player of planet
+	 *
+	 * @return \Lolli\Gaw\Domain\Model\Player
+	 */
+	public function getPlayer() {
+		return $this->player;
+	}
+
+	/**
+	 * Set corresponding player of planet
+	 *
+	 * @param \Lolli\Gaw\Domain\Model\Player $player
+	 */
+	public function setPlayer(\Lolli\Gaw\Domain\Model\Player $player) {
+		$this->player = $player;
+	}
 
 	/**
 	 * @param integer $galaxyNumber

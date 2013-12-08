@@ -59,8 +59,32 @@ class WorkerCommandController extends \TYPO3\Flow\Cli\CommandController {
 			if (!empty($jobArray['clientBlockingOn'])) {
 				$this->redisFacade->pushClientFeedback($jobArray['clientBlockingOn'], $result);
 			}
-			$this->redisFacade->notifyDispatcherJobCompleted($job);
+			$this->redisFacade->notifyDispatcherJobCompleted($job[1]);
 		}
+	}
+
+	protected function createRandomPlanet(array $data) {
+		$foundPlanet = FALSE;
+		do {
+			$galaxyNumber = 1;
+			$systemNumber = mt_rand(1, 300);
+			$planetNumber = mt_rand(1, 12);
+			$existingPlanet = $this->planetRepository->findOneByPosition($galaxyNumber, $systemNumber, $planetNumber);
+			if (!($existingPlanet instanceof \Lolli\Gaw\Domain\Model\Planet)) {
+				$foundPlanet = TRUE;
+			}
+		} while ($foundPlanet == FALSE);
+		$planet = new \Lolli\Gaw\Domain\Model\Planet();
+		$planet->setGalaxyNumber($galaxyNumber);
+		$planet->setSystemNumber($systemNumber);
+		$planet->setPlanetNumber($planetNumber);
+		$this->planetRepository->add($planet);
+		$this->persistenceManager->persistAll();
+		return array(
+			'galaxyNumber' => $planet->getGalaxyNumber(),
+			'systemNumber' => $planet->getSystemNumber(),
+			'planetNumber' => $planet->getPlanetNumber(),
+		);
 	}
 
 	protected function beginBuildBase(array $data) {
@@ -81,7 +105,7 @@ class WorkerCommandController extends \TYPO3\Flow\Cli\CommandController {
 		$planet->setStructureReadyTime($readyTime);
 		$this->planetRepository->update($planet);
 		$this->persistenceManager->persistAll();
-		return TRUE;
+		return array('readyTime' => $readyTime);
 	}
 
 	protected function doneBuildBase(array $data) {
