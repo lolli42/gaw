@@ -44,8 +44,12 @@ class GalaxyController extends \TYPO3\Flow\Mvc\Controller\ActionController {
 		$player = $this->securityContext->getPartyByType('Lolli\Gaw\Domain\Model\Player');
 		if (is_null($galaxy) || is_null($system)) {
 			$selectedPlanet = $player->getSelectedPlanet();
-			$galaxy = $selectedPlanet->getGalaxyNumber();
-			$system = $selectedPlanet->getSystemNumber();
+			if (is_null($galaxy)) {
+				$galaxy = $selectedPlanet->getGalaxyNumber();
+			}
+			if (is_null($system)) {
+				$system = $selectedPlanet->getSystemNumber();
+			}
 		}
 
 		if ($galaxy < 1 || $galaxy > 100) {
