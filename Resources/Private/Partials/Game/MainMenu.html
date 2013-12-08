@@ -1,0 +1,41 @@
+<f:comment>
+	Body
+	This is source ordered to be pulled to the left on larger screens
+</f:comment>
+<div class="large-3 columns ">
+	<div class="panel">
+		<div class="section-container vertical-nav" data-section data-options="deep_linking: false; one_up: true">
+			<h5 class="title">
+				{player.gameNick}
+			</h5>
+
+			<f:form
+				method="post"
+				action="selectPlanet"
+				controller="player"
+				object="{player}"
+				objectName="player"
+				id="lolli-gaw-player-selectPlanet"
+			>
+				<f:form.select
+					property="selectedPlanet"
+					options="{player.planets}"
+					optionLabelField="planetPositionString"
+					id="lolli-gaw-player-selectPlanet-select"
+				/>
+			</f:form>
+
+			<section class="section">
+				<h5 class="title">
+					<f:link.action action="index" controller="Planet">Planeten</f:link.action>
+				</h5>
+				<h5 class="title">
+					<f:link.action action="index" controller="Galaxy">Galaxie</f:link.action>
+				</h5>
+				<h5 class="title">
+					<f:link.action action="logout" controller="Authentication">Logout</f:link.action>
+				</h5>
+			</section>
+		</div>
+	</div>
+</div>

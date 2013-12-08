@@ -22,6 +22,12 @@ class GalaxyController extends \TYPO3\Flow\Mvc\Controller\ActionController {
 
 	/**
 	 * @Flow\Inject
+	 * @var \TYPO3\Flow\Security\Context
+	 */
+	protected $securityContext;
+
+	/**
+	 * @Flow\Inject
 	 * @var \Lolli\Gaw\Domain\Repository\PlanetRepository
 	 */
 	protected $planetRepository;
@@ -33,7 +39,15 @@ class GalaxyController extends \TYPO3\Flow\Mvc\Controller\ActionController {
 	 * @param int $system
 	 * @throws Exception\ArgumentException
 	 */
-	public function indexAction($galaxy = 1, $system = 1) {
+	public function indexAction($galaxy = NULL, $system = NULL) {
+		/** @var \Lolli\Gaw\Domain\Model\Player $player */
+		$player = $this->securityContext->getPartyByType('Lolli\Gaw\Domain\Model\Player');
+		if (is_null($galaxy) || is_null($system)) {
+			$selectedPlanet = $player->getSelectedPlanet();
+			$galaxy = $selectedPlanet->getGalaxyNumber();
+			$system = $selectedPlanet->getSystemNumber();
+		}
+
 		if ($galaxy < 1 || $galaxy > 100) {
 			throw new Exception\ArgumentException('Galaxy out of bounds', 1386407221);
 		}
@@ -64,6 +78,7 @@ class GalaxyController extends \TYPO3\Flow\Mvc\Controller\ActionController {
 		}
 		$this->view->assignMultiple(
 			array(
+				'player' => $player,
 				'galaxy' => $galaxy,
 				'nextGalaxy' => $nextGalaxy,
 				'previousGalaxy' => $previousGalaxy,

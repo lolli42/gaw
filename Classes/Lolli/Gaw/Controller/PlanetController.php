@@ -23,6 +23,12 @@ class PlanetController extends \TYPO3\Flow\Mvc\Controller\ActionController {
 
 	/**
 	 * @Flow\Inject
+	 * @var \TYPO3\Flow\Security\Context
+	 */
+	protected $securityContext;
+
+	/**
+	 * @Flow\Inject
 	 * @var \Lolli\Gaw\Redis\ClientFacade
 	 */
 	protected $redisFacade;
@@ -37,7 +43,15 @@ class PlanetController extends \TYPO3\Flow\Mvc\Controller\ActionController {
 	 * @return void
 	 */
 	public function indexAction() {
-		$this->view->assign('planets', $this->planetRepository->findAll());
+		/** @var \Lolli\Gaw\Domain\Model\Player $player */
+		$player = $this->securityContext->getPartyByType('Lolli\Gaw\Domain\Model\Player');
+
+		$this->view->assignMultiple(
+			array(
+				'player' => $player,
+				'planets' => $this->planetRepository->findAll(),
+			)
+		);
 	}
 
 	/**
@@ -45,7 +59,15 @@ class PlanetController extends \TYPO3\Flow\Mvc\Controller\ActionController {
 	 * @return void
 	 */
 	public function showAction(Planet $planet) {
-		$this->view->assign('planet', $planet);
+		/** @var \Lolli\Gaw\Domain\Model\Player $player */
+		$player = $this->securityContext->getPartyByType('Lolli\Gaw\Domain\Model\Player');
+
+		$this->view->assignMultiple(
+			array(
+				'player' => $player,
+				'planet' => $planet,
+			)
+		);
 	}
 
 	public function buildBaseAction(Planet $planet) {

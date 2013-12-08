@@ -28,10 +28,30 @@ class Player extends \TYPO3\Party\Domain\Model\AbstractParty {
 	protected $gameNick;
 
 	/**
+	 * @var \Lolli\Gaw\Domain\Model\Planet
+	 * @ORM\OneToOne
+	 */
+	protected $mainPlanet;
+
+	/**
+	 * @var \Lolli\Gaw\Domain\Model\Planet
+	 * @ORM\OneToOne
+	 */
+	protected $selectedPlanet;
+
+	/**
 	 * @var \Doctrine\Common\Collections\Collection<\Lolli\Gaw\Domain\Model\Planet>
 	 * @ORM\OneToMany(mappedBy="player")
 	 */
 	protected $planets;
+
+	/**
+	 * Constructs this Player
+	 */
+	public function __construct() {
+		parent::__construct();
+		$this->planets = new \Doctrine\Common\Collections\ArrayCollection();
+	}
 
 	/**
 	 * Set game nick
@@ -52,11 +72,39 @@ class Player extends \TYPO3\Party\Domain\Model\AbstractParty {
 	}
 
 	/**
-	 * Constructs this Player
+	 * Set main planet
+	 *
+	 * @param Planet $planet
 	 */
-	public function __construct() {
-		parent::__construct();
-		$this->planets = new \Doctrine\Common\Collections\ArrayCollection();
+	public function setMainPlanet(Planet $planet) {
+		$this->mainPlanet = $planet;
+	}
+
+	/**
+	 * Get main planet
+	 *
+	 * @return Planet
+	 */
+	public function getMainPlanet() {
+		return $this->mainPlanet;
+	}
+
+	/**
+	 * Set selected planet
+	 *
+	 * @param Planet $planet
+	 */
+	public function setSelectedPlanet(Planet $planet) {
+		$this->selectedPlanet = $planet;
+	}
+
+	/**
+	 * Get selected planet
+	 *
+	 * @return Planet
+	 */
+	public function getSelectedPlanet() {
+		return $this->selectedPlanet;
 	}
 
 	/**
@@ -73,7 +121,7 @@ class Player extends \TYPO3\Party\Domain\Model\AbstractParty {
 	 *
 	 * @param \Lolli\Gaw\Domain\Model\Planet $planet
 	 */
-	public function addPlanet(\Lolli\Gaw\Domain\Model\Planet $planet) {
+	public function addPlanet(Planet $planet) {
 		$this->planets->add($planet);
 		$planet->setPlayer($this);
 	}
