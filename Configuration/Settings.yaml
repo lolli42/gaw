@@ -21,3 +21,9 @@ TYPO3:
         providers:
           DefaultProvider:
             provider: PersistedUsernamePasswordProvider
+            entryPoint: 'WebRedirect'
+            entryPointOptions:
+              routeValues:
+                '@package': 'Lolli.Gaw'
+                '@controller': 'Authentication'
+                '@action': 'index'
