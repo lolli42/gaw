@@ -64,6 +64,8 @@ class PlanetBuildingController extends \TYPO3\Flow\Mvc\Controller\ActionControll
 				'player' => $player,
 				'selectedPlanet' => $planet,
 				'structureTechTree' => $planetCalculationService->getStructureTechTree(),
+				'realTime' => $this->redisFacade->getRealTimeNow(),
+				'gameTime' => $this->redisFacade->getGameTimeNow(),
 			)
 		);
 	}

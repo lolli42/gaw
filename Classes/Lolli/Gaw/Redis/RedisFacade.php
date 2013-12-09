@@ -56,7 +56,7 @@ class RedisFacade {
 	/**
 	 * Get "now" game time in microseconds
 	 *
-	 * @return int
+	 * @return int Timestamp in microseconds
 	 */
 	public function getGameTimeNow() {
 		$this->redis->multi();
@@ -69,16 +69,28 @@ class RedisFacade {
 		$realTime = $this->redisTimeToMicroseconds($result[1]);
 		$gameTime = $result[2];
 
-		return (int) ($gameTime + ($realTime - $lastRealTime));
+		return (int)($gameTime + ($realTime - $lastRealTime));
+	}
+
+	/**
+	 * Get "current" real time.
+	 * Should only be used in fluid and such to calculate ready times,
+	 * everything else must be relative to game time!
+	 *
+	 * @return int Timestamp in microseconds
+	 */
+	public function getRealTimeNow() {
+		$redisTime = $this->redis->time();
+		return $this->redisTimeToMicroseconds($redisTime);
 	}
 
 	/**
 	 * array($seconds, $microseconds) -> integer time in microseconds
 	 *
 	 * @param array $redisTime
-	 * @return mixed
+	 * @return int Timestamp in microseconds
 	 */
 	public function redisTimeToMicroseconds(array $redisTime) {
-		return ($redisTime[0] * 1000000) + $redisTime[1];
+		return (int)(($redisTime[0] * 1000000) + $redisTime[1]);
 	}
 }

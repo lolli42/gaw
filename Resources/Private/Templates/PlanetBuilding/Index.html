@@ -14,32 +14,39 @@
 </f:section>
 
 <f:section name="Content">
+
+	<f:comment>
+		@TODO: Needs proper implementation
+		<f:form action="renamePlanet" object="{selectedPlanet}" objectName="planet">
+			<th>Name</th>
+			<td><f:form.textfield property="name" id="name" /></td>
+			<td><f:form.submit value="Umbenennen" /></td>
+		</f:form>
+	</f:comment>
+
 	<table>
-
-		<f:comment>
+		<thead>
 			<tr>
-				<th>In Bau</th>
-				<td>{selectedPlanet.structureInProgress}</td>
-				<td>
-					<f:if condition="{selectedPlanet.structureReadyTime}">
-						<f:format.date forceLocale="de_DE" format="H:i:s">
-							<f:format.printf arguments="{0: selectedPlanet.structureReadyTime}">@%1$d</f:format.printf>
-						</f:format.date>
-					</f:if>
-				</td>
+				<th colspan="2">
+					Laufende Bauaufträge <span class="entity-available">[{selectedPlanet.structureBuildQueue -> f:count()}]</span>
+				</th>
 			</tr>
-		</f:comment>
+		</thead>
+		<tbody>
+			<f:for each="{selectedPlanet.structureBuildQueue}" as="queueItem">
+				<tr>
+					<td>
+						<f:translate id="planet.{queueItem.name}" />
+					</td>
+					<td>
+						{queueItem.readyTime -> gaw:format.realTime(gameTime: gameTime, realTime: realTime)}
+					</td>
+				</tr>
+			</f:for>
+		</tbody>
+	</table>
 
-		<f:comment>
-			<tr>
-				<f:form action="renamePlanet" object="{selectedPlanet}" objectName="planet">
-					<th>Name</th>
-					<td><f:form.textfield property="name" id="name" /></td>
-					<td><f:form.submit value="Umbenennen" /></td>
-				</f:form>
-			</tr>
-		</f:comment>
-
+	<table>
 		<thead>
 			<tr>
 				<th colspan="2">
@@ -47,7 +54,6 @@
 				</th>
 			</tr>
 		</thead>
-
 		<f:for
 			each="{
 				0: 'base',
