@@ -68,15 +68,26 @@ class PlanetBuildingController extends \TYPO3\Flow\Mvc\Controller\ActionControll
 		);
 	}
 
-	public function buildBaseAction(Planet $planet) {
+	/**
+	 * Queue building a planet structure
+	 *
+	 * @param Planet $planet
+	 * @param string $structureName
+	 * @throws Exception
+	 */
+	public function addStructureToBuildQueueAction(Planet $planet, $structureName) {
+		if (is_null(\TYPO3\Flow\Reflection\ObjectAccess::getPropertyPath($planet, $structureName))) {
+			throw new Exception('Structure not found', 1386597704);
+		}
 		$data = array(
-			'command' => 'beginBuildBase',
+			'command' => 'addPlanetStructureToBuildQueue',
+			'structureName' => $structureName,
 			'tags' => array($planet->getPlanetPositionString()),
 			'galaxyNumber' => $planet->getGalaxyNumber(),
 			'systemNumber' => $planet->getSystemNumber(),
 			'planetNumber' => $planet->getPlanetNumber(),
 		);
-		// @TODO: Handle result
+		// @TODO: Handle result? It is currently readyTime, or some error message if job did not succeed.
 		$success = $this->redisFacade->scheduleBlockingJob($data);
 		$this->addFlashMessage('Planet wird ausgebaut');
 		$this->planetRepository->refresh($planet);

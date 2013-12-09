@@ -7309,11 +7309,11 @@ a.th {
 }
 
 /* line 61, ../../Private/Styles/GoW.scss */
-.techtree-available {
+.entity-available {
   color: darkgreen;
 }
 
 /* line 64, ../../Private/Styles/GoW.scss */
-.techtree-not-available {
+.entity-not-available {
   color: red;
 }

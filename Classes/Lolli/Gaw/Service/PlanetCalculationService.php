@@ -85,19 +85,47 @@ class PlanetCalculationService {
 	}
 
 	/**
-	 * @param Planet $planet
-	 * @return integer seconds
+	 * Whether a structure can be build on planet according to tech tree
+	 *
+	 * @param Planet $planet Planet to check
+	 * @param string $structure The structure to build
+	 * @throws Exception
+	 * @return boolean TRUE if structure can be build
 	 */
-	public function getBaseBuildTime(Planet $planet) {
-		// 4 secs
-		return (int)(4000000);
-//		return (int)(1000000 * ($planet->getBase() + 1)); // 32 * 60
+	public function isStructureAvailable(Planet $planet, $structure) {
+		if (!isset($this->structureTechTree[$structure])) {
+			throw new \Lolli\Gaw\Service\Exception(
+				'Structure not in techtree', 1386595094
+			);
+		}
+		$techTreeOfStructure = $this->structureTechTree[$structure];
+		$result = TRUE;
+		foreach ($techTreeOfStructure as $structureName => $requiredLevel) {
+			$propertyName = 'get' . ucfirst($structureName);
+			if ($planet->$propertyName() < $requiredLevel) {
+				$result = FALSE;
+			}
+		}
+		return $result;
 	}
 
 	/**
-	 * Calculate
+	 * Calculate time to build a structure
 	 *
-	 * @param Planet $planet
+	 * @param Planet $planet Planet to work on
+	 * @param string $structureName The structure to build
+	 * @return integer seconds
+	 */
+	public function getBuildTimeOfStructure(Planet $planet, $structureName) {
+		// 4 secs
+		return (int)(4000000);
+		// return (int)(1000000 * ($planet->getBase() + 1)); // 32 * 60
+	}
+
+	/**
+	 * Calculate resources on planet at given time
+	 *
+	 * @param Planet $planet Planet to work on
 	 * @param integer $time Absolute game time in microseconds
 	 * @throws Exception If time is in the past in comparison to last resource update time
 	 * @return array Resources

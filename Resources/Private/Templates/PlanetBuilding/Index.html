@@ -15,17 +15,20 @@
 
 <f:section name="Content">
 	<table>
-		<tr>
-			<th>In Bau</th>
-			<td>{selectedPlanet.structureInProgress}</td>
-			<td>
-				<f:if condition="{selectedPlanet.structureReadyTime}">
-					<f:format.date forceLocale="de_DE" format="H:i:s">
-						<f:format.printf arguments="{0: selectedPlanet.structureReadyTime}">@%1$d</f:format.printf>
-					</f:format.date>
-				</f:if>
-			</td>
-		</tr>
+
+		<f:comment>
+			<tr>
+				<th>In Bau</th>
+				<td>{selectedPlanet.structureInProgress}</td>
+				<td>
+					<f:if condition="{selectedPlanet.structureReadyTime}">
+						<f:format.date forceLocale="de_DE" format="H:i:s">
+							<f:format.printf arguments="{0: selectedPlanet.structureReadyTime}">@%1$d</f:format.printf>
+						</f:format.date>
+					</f:if>
+				</td>
+			</tr>
+		</f:comment>
 
 		<f:comment>
 			<tr>
@@ -37,15 +40,40 @@
 			</tr>
 		</f:comment>
 
-		<tr>
-				<th>Basis</th>
-				<td>{selectedPlanet.base}</td>
-				<td>
-					<f:form action="buildBase" object="{selectedPlanet}" objectName="planet">
-						<f:form.submit value="Ausbauen" />
-					</f:form>
-				</td>
-		</tr>
+		<thead>
+			<tr>
+				<th colspan="2">
+					Gebäude
+				</th>
+			</tr>
+		</thead>
+
+		<f:for
+			each="{
+				0: 'base',
+				1: 'ironMine',
+				2: 'siliconMine',
+				3: 'xenonMine',
+				4: 'hydrazineMine',
+				5: 'energyMine'
+			}"
+			as="structureName"
+		>
+			<f:if condition="{selectedPlanet -> gaw:planet.isStructureAvailable(structureName: structureName)}">
+				<tr>
+					<td>
+						<f:translate id="planet.{structureName}" />
+						<span class="entity-available">[{selectedPlanet -> gaw:property(propertyName: structureName)}]</span>
+					</td>
+					<td>
+						<f:form action="addStructureToBuildQueue" object="{selectedPlanet}" objectName="planet">
+							<f:form.hidden value="{structureName}" name="structureName" />
+							<f:form.submit value="Ausbauen" />
+						</f:form>
+					</td>
+				</tr>
+			</f:if>
+		</f:for>
 	</table>
 
 	<table>
@@ -57,10 +85,10 @@
 			</tr>
 		</thead>
 		<tbody>
-			<f:for each="{structureTechTree}" as="requirements" key="structure">
+			<f:for each="{structureTechTree}" as="requirements" key="structureName">
 				<tr>
 					<td>
-						<f:translate id="planet.{structure}" />
+						<f:translate id="planet.{structureName}" />
 					</td>
 					<td>
 						<ul class="no-bullet no-margin-bottom">
@@ -69,14 +97,14 @@
 								<f:then>
 									<li>
 										<f:translate id="planet.{requirement}" />
-										<span class="techtree-not-available">[{level}]</span>
-										<span class="techtree-available">[{selectedPlanet -> gaw:property(propertyName: requirement)}]</span>
+										<span class="entity-not-available">[{level}]</span>
+										<span class="entity-available">[{selectedPlanet -> gaw:property(propertyName: requirement)}]</span>
 									</li>
 								</f:then>
 								<f:else>
 									<li>
 										<f:translate id="planet.{requirement}" />
-										<span class="techtree-available">[{level}]</span>
+										<span class="entity-available">[{level}]</span>
 									</li>
 								</f:else>
 							</f:if>

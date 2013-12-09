@@ -30,7 +30,7 @@ use TYPO3\Fluid\Core\ViewHelper\AbstractViewHelper;
 class PropertyViewHelper extends AbstractViewHelper {
 
 	/**
-	 * Render the supplied byte count as a human readable string.
+	 * Return an objects property by given property name
 	 *
 	 * @param string $propertyName The property to fetch, without "get"
 	 * @param object $object The object to work on

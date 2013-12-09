@@ -105,21 +105,24 @@ class WorkerCommandController extends \TYPO3\Flow\Cli\CommandController {
 		);
 	}
 
-	protected function beginBuildBase(array $data) {
+	protected function addPlanetStructureToBuildQueue(array $data) {
+		// @TODO: Stop if in progress
+		// @TODO: Check if building is available according to tech tree
+		// @TODO: Handle structure in progress correctly
+		$structureName = $data['structureName'];
 		$planet = $this->planetRepository->findOneByPosition($data['galaxyNumber'], $data['systemNumber'], $data['planetNumber']);
-
-		// @TODO: Stop if in progress ...
-		$delay = $this->planetCalculationService->getBaseBuildTime($planet);
+		$delay = $this->planetCalculationService->getBuildTimeOfStructure($planet, $structureName);
 		$readyTime = $data['time'] + $delay;
-		$doneBuildBaseData = array(
-			'command' => 'doneBuildBase',
+		$data = array(
+			'command' => 'incrementPlanetStructure',
+			'structureName' => $structureName,
 			'tags' => array($planet->getPlanetPositionString()),
 			'time' => $readyTime,
 			'galaxyNumber' => $planet->getGalaxyNumber(),
 			'systemNumber' => $planet->getSystemNumber(),
 			'planetNumber' => $planet->getPlanetNumber(),
 		);
-		$this->redisFacade->scheduleDelayedJob($doneBuildBaseData);
+		$this->redisFacade->scheduleDelayedJob($data);
 		$planet->setStructureInProgress(1);
 		$planet->setStructureReadyTime($readyTime);
 		$this->planetRepository->update($planet);
@@ -128,10 +131,12 @@ class WorkerCommandController extends \TYPO3\Flow\Cli\CommandController {
 		return array('readyTime' => $readyTime);
 	}
 
-	protected function doneBuildBase(array $data) {
+	protected function incrementPlanetStructure(array $data) {
 		//@TODO updateRessOnPlaniAtTime($data['time']);
+		$structureName = $data['structureName'];
+		$incrementMethodName = 'increment' . ucfirst($structureName);
 		$planet = $this->planetRepository->findOneByPosition($data['galaxyNumber'], $data['systemNumber'], $data['planetNumber']);
-		$planet->incrementBase();
+		$planet->$incrementMethodName();
 		$planet->setStructureInProgress(0);
 		$planet->setStructureReadyTime(0);
 		$this->planetRepository->update($planet);
