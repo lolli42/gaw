@@ -1,3 +1,5 @@
+{namespace gaw=Lolli\Gaw\ViewHelpers}
+
 <f:layout name="Game" />
 
 <f:section name="Title">
@@ -44,5 +46,45 @@
 					</f:form>
 				</td>
 		</tr>
+	</table>
+
+	<table>
+		<thead>
+			<tr>
+				<th colspan="2">
+					Techtree
+				</th>
+			</tr>
+		</thead>
+		<tbody>
+			<f:for each="{structureTechTree}" as="requirements" key="structure">
+				<tr>
+					<td>
+						<f:translate id="planet.{structure}" />
+					</td>
+					<td>
+						<ul class="no-bullet no-margin-bottom">
+							<f:for each="{requirements}" as="level" key="requirement">
+								<f:if condition="{selectedPlanet -> gaw:property(propertyName: requirement)} < {level}">
+								<f:then>
+									<li>
+										<f:translate id="planet.{requirement}" />
+										<span class="techtree-not-available">[{level}]</span>
+										<span class="techtree-available">[{selectedPlanet -> gaw:property(propertyName: requirement)}]</span>
+									</li>
+								</f:then>
+								<f:else>
+									<li>
+										<f:translate id="planet.{requirement}" />
+										<span class="techtree-available">[{level}]</span>
+									</li>
+								</f:else>
+							</f:if>
+						</f:for>
+						</ul>
+					</td>
+				</tr>
+			</f:for>
+		</tbody>
 	</table>
 </f:section>

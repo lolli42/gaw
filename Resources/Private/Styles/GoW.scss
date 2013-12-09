@@ -54,3 +54,13 @@
 // @import "foundation/components/tooltips";
 // @import "foundation/components/dropdown";
 
+.no-margin-bottom {
+  margin-bottom: 0;
+}
+
+.techtree-available {
+  color: darkgreen;
+}
+.techtree-not-available {
+  color: red;
+}

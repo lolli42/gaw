@@ -7302,3 +7302,18 @@ a.th {
 .f-dropdown.large {
   max-width: 800px;
 }
+
+/* line 57, ../../Private/Styles/GoW.scss */
+.no-margin-bottom {
+  margin-bottom: 0;
+}
+
+/* line 61, ../../Private/Styles/GoW.scss */
+.techtree-available {
+  color: darkgreen;
+}
+
+/* line 64, ../../Private/Styles/GoW.scss */
+.techtree-not-available {
+  color: red;
+}

@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2">
+	<file original="" product-name="Lolli.Gaw" source-language="de" datatype="plaintext">
+		<body>
+			<trans-unit id="planet.base" xml:space="preserve">
+				<source>Basis</source>
+			</trans-unit>
+			<trans-unit id="planet.ironMine" xml:space="preserve">
+				<source>Eisengrube</source>
+			</trans-unit>
+			<trans-unit id="planet.siliconMine" xml:space="preserve">
+				<source>Siliziumzüchtung</source>
+			</trans-unit>
+			<trans-unit id="planet.xenonMine" xml:space="preserve">
+				<source>Xenontrennung</source>
+			</trans-unit>
+			<trans-unit id="planet.hydrazineMine" xml:space="preserve">
+				<source>Hydrazinsynthese</source>
+			</trans-unit>
+			<trans-unit id="planet.energyMine" xml:space="preserve">
+				<source>Kraftwerk</source>
+			</trans-unit>
+		</body>
+	</file>
+</xliff>

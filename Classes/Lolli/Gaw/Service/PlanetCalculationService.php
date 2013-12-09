@@ -12,8 +12,55 @@ namespace Lolli\Gaw\Service;
  *                                                                        */
 
 use Lolli\Gaw\Domain\Model\Planet;
+use TYPO3\Flow\Annotations as Flow;
 
+/**
+ * Planet specifications and calculation
+ *
+ * @Flow\Scope("singleton")
+ */
 class PlanetCalculationService {
+
+	/**
+	const STRUCTURE_NONE = '';
+	const STRUCTURE_BASE = 'base';
+	const STRUCTURE_IRON = 'ironMine';
+	const STRUCTURE_SILICON = 'siliconMine';
+	const STRUCTURE_XENON = 'xenonMine';
+	const STRUCTURE_HYDRAZINE = 'hydrazineMine';
+	const STRUCTURE_ENERGY = 'energyMine';
+	 */
+
+	/**
+	 * Technology tree for structures
+	 *
+	 * @var array
+	 */
+	protected $structureTechTree = array(
+		'base' => array(),
+		'ironMine' => array(
+			'base' => 1,
+		),
+		'siliconMine' => array(
+			'base' => 1,
+		),
+		'xenonMine' => array(
+			'base' => 2,
+			'ironMine' => 1,
+			'siliconMine' => 1,
+		),
+		'hydrazineMine' => array(
+			'base' => 2,
+			'ironMine' => 1,
+			'siliconMine' => 1,
+		),
+		'energyMine' => array(
+			'base' => 2,
+			'ironMine' => 1,
+			'siliconMine' => 1,
+			'hydrazineMine' => 2,
+		),
+	);
 
 	/**
 	 * Basic resource production
@@ -27,6 +74,15 @@ class PlanetCalculationService {
 		'hydrazine' => 0.05,
 		'energy' => 0.05,
 	);
+
+	/**
+	 * Get structure techtree
+	 *
+	 * @return array
+	 */
+	public function getStructureTechTree() {
+		return $this->structureTechTree;
+	}
 
 	/**
 	 * @param Planet $planet

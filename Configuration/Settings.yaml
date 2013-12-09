@@ -27,3 +27,5 @@ TYPO3:
                 '@package': 'Lolli.Gaw'
                 '@controller': 'Authentication'
                 '@action': 'index'
+    i18n:
+      defaultLocale: de

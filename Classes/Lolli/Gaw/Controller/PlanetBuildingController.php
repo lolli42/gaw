@@ -57,10 +57,13 @@ class PlanetBuildingController extends \TYPO3\Flow\Mvc\Controller\ActionControll
 		// Update planet data after some worker updated it
 		$this->planetRepository->refresh($planet);
 
+		$planetCalculationService = new \Lolli\Gaw\Service\PlanetCalculationService();
+
 		$this->view->assignMultiple(
 			array(
 				'player' => $player,
 				'selectedPlanet' => $planet,
+				'structureTechTree' => $planetCalculationService->getStructureTechTree(),
 			)
 		);
 	}

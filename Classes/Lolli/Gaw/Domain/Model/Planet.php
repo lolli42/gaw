@@ -22,6 +22,11 @@ class Planet {
 
 	const STRUCTURE_NONE = 0;
 	const STRUCTURE_BASE = 1;
+	const STRUCTURE_IRON = 2;
+	const STRUCTURE_SILICON = 3;
+	const STRUCTURE_XENON = 4;
+	const STRUCTURE_HYDRAZINE = 5;
+	const STRUCTURE_ENERGY = 6;
 
 	/**
 	 * @var \Lolli\Gaw\Domain\Model\Player
@@ -31,27 +36,27 @@ class Planet {
 	protected $player;
 
 	/**
-	 * @var integer
+	 * @var int
 	 */
 	protected $galaxyNumber = 0;
 
 	/**
-	 * @var integer
+	 * @var int
 	 */
 	protected $systemNumber = 0;
 
 	/**
-	 * @var integer
+	 * @var int
 	 */
 	protected $planetNumber = 0;
 
 	/**
-	 * @var integer
+	 * @var int
 	 */
 	protected $structureInProgress = 0;
 
 	/**
-	 * @var integer
+	 * @var int
 	 * @ORM\Column(type="bigint", nullable=false, options={"unsigned"=true})
 	 */
 	protected $structureReadyTime = 0;
@@ -60,11 +65,6 @@ class Planet {
 	 * @var string
 	 */
 	protected $name = '';
-
-	/**
-	 * @var integer
-	 */
-	protected $base = 1;
 
 	/**
 	 * @var int
@@ -103,6 +103,36 @@ class Planet {
 	protected $energy = 2000000000;
 
 	/**
+	 * @var int
+	 */
+	protected $base = 1;
+
+	/**
+	 * @var int
+	 */
+	protected $ironMine = 0;
+
+	/**
+	 * @var int
+	 */
+	protected $siliconMine = 0;
+
+	/**
+	 * @var int
+	 */
+	protected $xenonMine = 0;
+
+	/**
+	 * @var int
+	 */
+	protected $hydrazineMine = 0;
+
+	/**
+	 * @var int
+	 */
+	protected $energyMine = 0;
+
+	/**
 	 * Get corresponding player of planet
 	 *
 	 * @return \Lolli\Gaw\Domain\Model\Player
@@ -121,7 +151,7 @@ class Planet {
 	}
 
 	/**
-	 * @param integer $galaxyNumber
+	 * @param int $galaxyNumber
 	 */
 	public function setGalaxyNumber($galaxyNumber) {
 		$this->galaxyNumber = $galaxyNumber;
@@ -135,7 +165,7 @@ class Planet {
 	}
 
 	/**
-	 * @param integer $systemNumber
+	 * @param int $systemNumber
 	 */
 	public function setSystemNumber($systemNumber) {
 		$this->systemNumber = $systemNumber;
@@ -149,7 +179,7 @@ class Planet {
 	}
 
 	/**
-	 * @param integer $planetNumber
+	 * @param int $planetNumber
 	 */
 	public function setPlanetNumber($planetNumber) {
 		$this->planetNumber = $planetNumber;
@@ -170,7 +200,7 @@ class Planet {
 	}
 
 	/**
-	 * @param integer $structureInProgress
+	 * @param int $structureInProgress
 	 */
 	public function setStructureInProgress($structureInProgress) {
 		$this->structureInProgress = $structureInProgress;
@@ -213,20 +243,6 @@ class Planet {
 	}
 
 	/**
-	 * @return integer
-	 */
-	public function getBase() {
-		return (int)$this->base;
-	}
-
-	/**
-	 * @return void
-	 */
-	public function incrementBase() {
-		$this->base = $this->base + 1;
-	}
-
-	/**
 	 * @param int $lastResourceUpdate
 	 */
 	public function setLastResourceUpdate($lastResourceUpdate) {
@@ -260,13 +276,13 @@ class Planet {
 	public function setSilicon($silicon) {
 		$this->silicon = $silicon;
 	}
+
 	/**
 	 * @return int
 	 */
 	public function getSilicon() {
 		return (int)$this->silicon;
 	}
-
 	/**
 	 * @param int $xenon
 	 */
@@ -307,5 +323,137 @@ class Planet {
 	 */
 	public function getEnergy() {
 		return (int)$this->energy;
+	}
+
+	/**
+	 * @return int
+	 */
+	public function getBase() {
+		return (int)$this->base;
+	}
+
+	/**
+	 * @param int $base
+	 */
+	public function setBase($base) {
+		$this->base = $base;
+	}
+
+	/**
+	 * @return int
+	 */
+	public function incrementBase() {
+		$this->base = $this->base + 1;
+		return $this->base;
+	}
+
+	/**
+	 * @param int $ironMine
+	 */
+	public function setIronMine($ironMine) {
+		$this->ironMine = $ironMine;
+	}
+
+	/**
+	 * @return int
+	 */
+	public function getIronMine() {
+		return (int)$this->ironMine;
+	}
+
+	/**
+	 * @return int
+	 */
+	public function incrementIronMine() {
+		$this->ironMine = $this->ironMine + 1;
+		return $this->base;
+	}
+
+	/**
+	 * @param int $siliconMine
+	 */
+	public function setSiliconMine($siliconMine) {
+		$this->siliconMine = $siliconMine;
+	}
+
+	/**
+	 * @return int
+	 */
+	public function getSiliconMine() {
+		return (int)$this->siliconMine;
+	}
+
+	/**
+	 * @return int
+	 */
+	public function incrementSiliconMine() {
+		$this->siliconMine = $this->siliconMine + 1;
+		return $this->siliconMine;
+	}
+
+	/**
+	 * @param int $xenonMine
+	 */
+	public function setXenonMine($xenonMine) {
+		$this->xenonMine = $xenonMine;
+	}
+
+	/**
+	 * @return int
+	 */
+	public function getXenonMine() {
+		return (int)$this->xenonMine;
+	}
+
+	/**
+	 * @return int
+	 */
+	public function incrementXenonMine() {
+		$this->xenonMine = $this->xenonMine + 1;
+		return $this->xenonMine;
+	}
+
+	/**
+	 * @param int $hydrazineMine
+	 */
+	public function setHydrazineMine($hydrazineMine) {
+		$this->hydrazineMine = $hydrazineMine;
+	}
+
+	/**
+	 * @return int
+	 */
+	public function getHydrazineMine() {
+		return (int)$this->hydrazineMine;
+	}
+
+	/**
+	 * @return int
+	 */
+	public function incrementHydrazineMine() {
+		$this->hydrazineMine = $this->hydrazineMine + 1;
+		return $this->hydrazineMine;
+	}
+
+	/**
+	 * @param int $energyMine
+	 */
+	public function setEnergyMine($energyMine) {
+		$this->energyMine = $energyMine;
+	}
+
+	/**
+	 * @return int
+	 */
+	public function getEnergyMine() {
+		return (int)$this->energyMine;
+	}
+
+	/**
+	 * @return int
+	 */
+	public function incrementEnergyMine() {
+		$this->energyMine = $this->energyMine + 1;
+		return $this->energyMine;
 	}
 }
