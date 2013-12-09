@@ -1,3 +1,5 @@
+{namespace gaw=Lolli\Gaw\ViewHelpers}
+
 <!DOCTYPE html>
 <html>
 	<head>
@@ -7,7 +9,39 @@
 
 	<body>
 		<div id="lolli-gaw-game">
-			<f:render partial="Layouts/Header" />
+
+			<f:comment>
+				Head row
+			</f:comment>
+			<div class="row">
+				<div class="large-12 columns">
+					<hr />
+				</div>
+			</div>
+
+			<div class="row">
+				<div class="large-12 columns">
+					<ul class="inline-list">
+						<li>
+							Eisen: {selectedPlanet.iron -> gaw:format.unit()}
+						</li>
+						<li>
+							Silizium: {selectedPlanet.silicon -> gaw:format.unit()}
+						</li>
+						<li>
+							Xenon: {selectedPlanet.xenon -> gaw:format.unit()}
+						</li>
+						<li>
+							Hydrazin: {selectedPlanet.hydrazine -> gaw:format.unit()}
+						</li>
+						<li>
+							Energie: {selectedPlanet.energy -> gaw:format.unit()}
+						</li>
+					</ul>
+					<hr />
+				</div>
+			</div>
+
 
 			<f:comment>
 				Body

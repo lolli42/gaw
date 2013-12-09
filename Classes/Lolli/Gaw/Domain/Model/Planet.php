@@ -26,6 +26,7 @@ class Planet {
 	/**
 	 * @var \Lolli\Gaw\Domain\Model\Player
 	 * @ORM\ManyToOne(inversedBy="planets")
+	 * @Flow\Lazy
 	 */
 	protected $player;
 
@@ -50,7 +51,8 @@ class Planet {
 	protected $structureInProgress = 0;
 
 	/**
-	 * @var float
+	 * @var integer
+	 * @ORM\Column(type="bigint", nullable=false, options={"unsigned"=true})
 	 */
 	protected $structureReadyTime = 0;
 
@@ -62,7 +64,43 @@ class Planet {
 	/**
 	 * @var integer
 	 */
-	protected $base = 0;
+	protected $base = 1;
+
+	/**
+	 * @var int
+	 * @ORM\Column(type="bigint", nullable=false, options={"unsigned"=true})
+	 */
+	protected $lastResourceUpdate = 0;
+
+	/**
+	 * @var int
+	 * @ORM\Column(type="bigint", nullable=false, options={"unsigned"=true})
+	 */
+	protected $iron = 2000000000; // microunits -> 2000 units
+
+	/**
+	 * @var int
+	 * @ORM\Column(type="bigint", nullable=false, options={"unsigned"=true})
+	 */
+	protected $silicon = 2000000000;
+
+	/**
+	 * @var int
+	 * @ORM\Column(type="bigint", nullable=false, options={"unsigned"=true})
+	 */
+	protected $xenon = 2000000000;
+
+	/**
+	 * @var int
+	 * @ORM\Column(type="bigint", nullable=false, options={"unsigned"=true})
+	 */
+	protected $hydrazine = 2000000000;
+
+	/**
+	 * @var int
+	 * @ORM\Column(type="bigint", nullable=false, options={"unsigned"=true})
+	 */
+	protected $energy = 2000000000;
 
 	/**
 	 * Get corresponding player of planet
@@ -93,7 +131,7 @@ class Planet {
 	 * @return int
 	 */
 	public function getGalaxyNumber() {
-		return $this->galaxyNumber;
+		return (int)$this->galaxyNumber;
 	}
 
 	/**
@@ -107,7 +145,7 @@ class Planet {
 	 * @return int
 	 */
 	public function getSystemNumber() {
-		return $this->systemNumber;
+		return (int)$this->systemNumber;
 	}
 
 	/**
@@ -121,7 +159,7 @@ class Planet {
 	 * @return int
 	 */
 	public function getPlanetNumber() {
-		return $this->planetNumber;
+		return (int)$this->planetNumber;
 	}
 
 	/**
@@ -142,11 +180,11 @@ class Planet {
 	 * @return int
 	 */
 	public function getStructureInProgress() {
-		return $this->structureInProgress;
+		return (int)$this->structureInProgress;
 	}
 
 	/**
-	 * @param float $structureReadyTime
+	 * @param int $structureReadyTime
 	 */
 	public function setStructureReadyTime($structureReadyTime) {
 		$this->structureReadyTime = $structureReadyTime;
@@ -156,7 +194,7 @@ class Planet {
 	 * @return int
 	 */
 	public function getStructureReadyTime() {
-		return $this->structureReadyTime;
+		return (int)$this->structureReadyTime;
 	}
 
 	/**
@@ -178,7 +216,7 @@ class Planet {
 	 * @return integer
 	 */
 	public function getBase() {
-		return $this->base;
+		return (int)$this->base;
 	}
 
 	/**
@@ -188,4 +226,86 @@ class Planet {
 		$this->base = $this->base + 1;
 	}
 
+	/**
+	 * @param int $lastResourceUpdate
+	 */
+	public function setLastResourceUpdate($lastResourceUpdate) {
+		$this->lastResourceUpdate = $lastResourceUpdate;
+	}
+
+	/**
+	 * @return int
+	 */
+	public function getLastResourceUpdate() {
+		return (int)$this->lastResourceUpdate;
+	}
+
+	/**
+	 * @param int $iron
+	 */
+	public function setIron($iron) {
+		$this->iron = $iron;
+	}
+
+	/**
+	 * @return int
+	 */
+	public function getIron() {
+		return (int)$this->iron;
+	}
+
+	/**
+	 * @param int $silicon
+	 */
+	public function setSilicon($silicon) {
+		$this->silicon = $silicon;
+	}
+	/**
+	 * @return int
+	 */
+	public function getSilicon() {
+		return (int)$this->silicon;
+	}
+
+	/**
+	 * @param int $xenon
+	 */
+	public function setXenon($xenon) {
+		$this->xenon = $xenon;
+	}
+
+	/**
+	 * @return int
+	 */
+	public function getXenon() {
+		return (int)$this->xenon;
+	}
+
+	/**
+	 * @param int $hydrazine
+	 */
+	public function setHydrazine($hydrazine) {
+		$this->hydrazine = $hydrazine;
+	}
+
+	/**
+	 * @return int
+	 */
+	public function getHydrazine() {
+		return (int)$this->hydrazine;
+	}
+
+	/**
+	 * @param int $energy
+	 */
+	public function setEnergy($energy) {
+		$this->energy = $energy;
+	}
+
+	/**
+	 * @return int
+	 */
+	public function getEnergy() {
+		return (int)$this->energy;
+	}
 }

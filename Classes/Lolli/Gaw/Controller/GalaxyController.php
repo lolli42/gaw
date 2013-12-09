@@ -83,6 +83,7 @@ class GalaxyController extends \TYPO3\Flow\Mvc\Controller\ActionController {
 		$this->view->assignMultiple(
 			array(
 				'player' => $player,
+				'selectedPlanet' => $player->getSelectedPlanet(),
 				'galaxy' => $galaxy,
 				'nextGalaxy' => $nextGalaxy,
 				'previousGalaxy' => $previousGalaxy,

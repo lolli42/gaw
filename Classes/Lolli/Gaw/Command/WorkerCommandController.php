@@ -63,6 +63,22 @@ class WorkerCommandController extends \TYPO3\Flow\Cli\CommandController {
 		}
 	}
 
+	protected function updateResourcesOnPlanet(array $data) {
+		$planet = $this->planetRepository->findOneByPosition($data['galaxyNumber'], $data['systemNumber'], $data['planetNumber']);
+		$time = $this->redisFacade->getGameTimeNow();
+		$newResources = $this->planetCalculationService->resourcesAtTime($planet, $time);
+		$planet->setIron($newResources['iron']);
+		$planet->setSilicon($newResources['silicon']);
+		$planet->setXenon($newResources['xenon']);
+		$planet->setHydrazine($newResources['hydrazine']);
+		$planet->setEnergy($newResources['energy']);
+		$planet->setLastResourceUpdate($time);
+		$this->planetRepository->update($planet);
+		$this->persistenceManager->persistAll();
+		$this->planetRepository->detach($planet);
+		return array('foo');
+	}
+
 	protected function createRandomPlanet(array $data) {
 		$foundPlanet = FALSE;
 		do {
@@ -78,8 +94,10 @@ class WorkerCommandController extends \TYPO3\Flow\Cli\CommandController {
 		$planet->setGalaxyNumber($galaxyNumber);
 		$planet->setSystemNumber($systemNumber);
 		$planet->setPlanetNumber($planetNumber);
+		$planet->setLastResourceUpdate($this->redisFacade->getGameTimeNow());
 		$this->planetRepository->add($planet);
 		$this->persistenceManager->persistAll();
+		$this->planetRepository->detach($planet);
 		return array(
 			'galaxyNumber' => $planet->getGalaxyNumber(),
 			'systemNumber' => $planet->getSystemNumber(),
@@ -90,6 +108,7 @@ class WorkerCommandController extends \TYPO3\Flow\Cli\CommandController {
 	protected function beginBuildBase(array $data) {
 		$planet = $this->planetRepository->findOneByPosition($data['galaxyNumber'], $data['systemNumber'], $data['planetNumber']);
 
+		// @TODO: Stop if in progress ...
 		$delay = $this->planetCalculationService->getBaseBuildTime($planet);
 		$readyTime = $data['time'] + $delay;
 		$doneBuildBaseData = array(
@@ -105,19 +124,18 @@ class WorkerCommandController extends \TYPO3\Flow\Cli\CommandController {
 		$planet->setStructureReadyTime($readyTime);
 		$this->planetRepository->update($planet);
 		$this->persistenceManager->persistAll();
+		$this->planetRepository->detach($planet);
 		return array('readyTime' => $readyTime);
 	}
 
 	protected function doneBuildBase(array $data) {
-		//updateRessOnPlaniAtTime($data['time']);
+		//@TODO updateRessOnPlaniAtTime($data['time']);
 		$planet = $this->planetRepository->findOneByPosition($data['galaxyNumber'], $data['systemNumber'], $data['planetNumber']);
 		$planet->incrementBase();
 		$planet->setStructureInProgress(0);
 		$planet->setStructureReadyTime(0);
 		$this->planetRepository->update($planet);
 		$this->persistenceManager->persistAll();
+		$this->planetRepository->detach($planet);
 	}
-
-	// updateRessOnPlaniAtTime()
-
 }

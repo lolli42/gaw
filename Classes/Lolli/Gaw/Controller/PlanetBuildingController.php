@@ -45,11 +45,22 @@ class PlanetBuildingController extends \TYPO3\Flow\Mvc\Controller\ActionControll
 	public function indexAction() {
 		/** @var \Lolli\Gaw\Domain\Model\Player $player */
 		$player = $this->securityContext->getPartyByType('Lolli\Gaw\Domain\Model\Player');
+		$planet = $player->getSelectedPlanet();
+		$data = array(
+			'command' => 'updateResourcesOnPlanet',
+			'tags' => array($planet->getPlanetPositionString()),
+			'galaxyNumber' => $planet->getGalaxyNumber(),
+			'systemNumber' => $planet->getSystemNumber(),
+			'planetNumber' => $planet->getPlanetNumber(),
+		);
+		$this->redisFacade->scheduleBlockingJob($data);
+		// Update planet data after some worker updated it
+		$this->planetRepository->refresh($planet);
 
 		$this->view->assignMultiple(
 			array(
 				'player' => $player,
-				'planet' => $player->getSelectedPlanet(),
+				'selectedPlanet' => $planet,
 			)
 		);
 	}
@@ -62,11 +73,10 @@ class PlanetBuildingController extends \TYPO3\Flow\Mvc\Controller\ActionControll
 			'systemNumber' => $planet->getSystemNumber(),
 			'planetNumber' => $planet->getPlanetNumber(),
 		);
+		// @TODO: Handle result
 		$success = $this->redisFacade->scheduleBlockingJob($data);
 		$this->addFlashMessage('Planet wird ausgebaut');
-
-		// difference between redirect and forward is here that redirect maps new and
-		// thus fetches updated planet from persistence
+		$this->planetRepository->refresh($planet);
 		$this->redirect('index');
 	}
 }

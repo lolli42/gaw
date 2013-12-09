@@ -20,6 +20,41 @@ use TYPO3\Flow\Persistence\Repository;
 class PlanetRepository extends Repository {
 
 	/**
+	 * @var \Doctrine\ORM\EntityManager
+	 */
+	protected $entityManager;
+
+	/**
+	 * Entity manager is needed for detach() and refresh()
+	 *
+	 * @param \Doctrine\Common\Persistence\ObjectManager $entityManager
+	 * @return void
+	 */
+	public function injectEntityManager(\Doctrine\Common\Persistence\ObjectManager $entityManager) {
+		$this->entityManager = $entityManager;
+	}
+
+	/**
+	 * Detach basically throws the object out of memory, so it is
+	 * re-created with 'fresh' data from db on next find* call
+	 *
+	 * @param \Lolli\Gaw\Domain\Model\Planet $planet
+	 */
+	public function detach(\Lolli\Gaw\Domain\Model\Planet $planet) {
+		$this->entityManager->detach($planet);
+	}
+
+	/**
+	 * Refresh updates the object with 'fresh' db data
+	 *
+	 * @param \Lolli\Gaw\Domain\Model\Planet $planet
+	 * @return \Lolli\Gaw\Domain\Model\Planet
+	 */
+	public function refresh(\Lolli\Gaw\Domain\Model\Planet $planet) {
+		return $this->entityManager->refresh($planet);
+	}
+
+	/**
 	 * Find a planet by its absolute position
 	 *
 	 * @param integer $galaxy Galaxy number
