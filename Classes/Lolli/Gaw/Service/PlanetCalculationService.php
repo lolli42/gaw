@@ -117,9 +117,31 @@ class PlanetCalculationService {
 	 * @return integer seconds
 	 */
 	public function getBuildTimeOfStructure(Planet $planet, $structureName) {
-		// 4 secs
-		return (int)(4000000);
+		// @TODO: Method needs to check queue if a base is queued for the same building already
+		// 10 secs
+		return 10000000;
 		// return (int)(1000000 * ($planet->getBase() + 1)); // 32 * 60
+	}
+
+	/**
+	 * Calculate when a specific structure is ready
+	 *
+	 * @param Planet $planet Planet to work on
+	 * @param string $structureName The structure to build
+	 * @param integer $time Time as offset, used if build queue is empty
+	 * @return int Ready time in microseconds
+	 */
+	public function getReadyTimeOfStructure(Planet $planet, $structureName, $time) {
+		$buildTime = $this->getBuildTimeOfStructure($planet, $structureName);
+		$currentBuildQueue = $planet->getStructureBuildQueue();
+		if ($currentBuildQueue->count() > 0) {
+			/** @var \Lolli\Gaw\Domain\Model\PlanetStructureBuildQueueItem $lastStructureInQueue */
+			$lastStructureInQueue = $currentBuildQueue->last();
+			$readyTime = $lastStructureInQueue->getReadyTime() + $buildTime;
+		} else {
+			$readyTime = $time + $buildTime;
+		}
+		return $readyTime;
 	}
 
 	/**

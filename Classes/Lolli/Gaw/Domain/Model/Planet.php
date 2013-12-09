@@ -51,15 +51,12 @@ class Planet {
 	protected $planetNumber = 0;
 
 	/**
-	 * @var int
+	 * @var \Doctrine\Common\Collections\Collection<\Lolli\Gaw\Domain\Model\PlanetStructureBuildQueueItem>
+	 * @ORM\OneToMany(mappedBy="planet")
+	 * @ORM\OrderBy({"readyTime" = "ASC"})
+	 * @Flow\Lazy
 	 */
-	protected $structureInProgress = 0;
-
-	/**
-	 * @var int
-	 * @ORM\Column(type="bigint", nullable=false, options={"unsigned"=true})
-	 */
-	protected $structureReadyTime = 0;
+	protected $structureBuildQueue;
 
 	/**
 	 * @var string
@@ -133,6 +130,13 @@ class Planet {
 	protected $energyMine = 0;
 
 	/**
+	 * Constructs this planet
+	 */
+	public function __construct() {
+		$this->structureBuildQueue = new \Doctrine\Common\Collections\ArrayCollection();
+	}
+
+	/**
 	 * Get corresponding player of planet
 	 *
 	 * @return \Lolli\Gaw\Domain\Model\Player
@@ -200,31 +204,29 @@ class Planet {
 	}
 
 	/**
-	 * @param int $structureInProgress
+	 * @return \Doctrine\Common\Collections\Collection<\Lolli\Gaw\Domain\Model\PlanetStructureBuildQueueItem>
 	 */
-	public function setStructureInProgress($structureInProgress) {
-		$this->structureInProgress = $structureInProgress;
+	public function getStructureBuildQueue() {
+		return $this->structureBuildQueue;
 	}
 
 	/**
-	 * @return int
+	 * Add a structure to build queue
+	 *
+	 * @param PlanetStructureBuildQueueItem $item
 	 */
-	public function getStructureInProgress() {
-		return (int)$this->structureInProgress;
+	public function addStructureToStructureBuildQueue(PlanetStructureBuildQueueItem $item) {
+		$item->setPlanet($this);
+		$this->structureBuildQueue->add($item);
 	}
 
 	/**
-	 * @param int $structureReadyTime
+	 * Remove a structure from build queue
+	 *
+	 * @param PlanetStructureBuildQueueItem $item
 	 */
-	public function setStructureReadyTime($structureReadyTime) {
-		$this->structureReadyTime = $structureReadyTime;
-	}
-
-	/**
-	 * @return int
-	 */
-	public function getStructureReadyTime() {
-		return (int)$this->structureReadyTime;
+	public function removeStructureFromBuildQueue(PlanetStructureBuildQueueItem $item) {
+		$this->structureBuildQueue->removeElement($item);
 	}
 
 	/**

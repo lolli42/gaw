@@ -46,7 +46,7 @@ class Player extends \TYPO3\Party\Domain\Model\AbstractParty {
 	protected $planets;
 
 	/**
-	 * Constructs this Player
+	 * Constructs this player
 	 */
 	public function __construct() {
 		parent::__construct();

@@ -45,11 +45,12 @@ class WorkerCommandController extends \TYPO3\Flow\Cli\CommandController {
 	protected $persistenceManager;
 
 	/**
-	 * A worker
+	 * Main worker loop
 	 *
 	 * @return void
 	 */
 	public function runCommand() {
+		var_dump('ready to work');
 		while (TRUE) {
 			$job = $this->redisFacade->waitForJob();
 			$jobArray = $this->redisFacade->getJobArrayFromJob($job);
@@ -79,7 +80,14 @@ class WorkerCommandController extends \TYPO3\Flow\Cli\CommandController {
 		return array('foo');
 	}
 
+	/**
+	 * Find a not settled planet position and create a planet here
+	 *
+	 * @param array $data Data to work on - unused here
+	 * @return array Result data
+	 */
 	protected function createRandomPlanet(array $data) {
+		// @TODO: Make smarter - This may take a while if there are not many open positions left
 		$foundPlanet = FALSE;
 		do {
 			$galaxyNumber = 1;
@@ -105,14 +113,19 @@ class WorkerCommandController extends \TYPO3\Flow\Cli\CommandController {
 		);
 	}
 
+	/**
+	 * Add a structure to planet build queue
+	 *
+	 * @param array $data Data to work on
+	 * @return array Result
+	 */
 	protected function addPlanetStructureToBuildQueue(array $data) {
-		// @TODO: Stop if in progress
+		// @TODO: Stop if more than "n" building are queued already
 		// @TODO: Check if building is available according to tech tree
 		// @TODO: Handle structure in progress correctly
 		$structureName = $data['structureName'];
 		$planet = $this->planetRepository->findOneByPosition($data['galaxyNumber'], $data['systemNumber'], $data['planetNumber']);
-		$delay = $this->planetCalculationService->getBuildTimeOfStructure($planet, $structureName);
-		$readyTime = $data['time'] + $delay;
+		$readyTime = $this->planetCalculationService->getReadyTimeOfStructure($planet, $structureName, $data['time']);
 		$data = array(
 			'command' => 'incrementPlanetStructure',
 			'structureName' => $structureName,
@@ -123,22 +136,47 @@ class WorkerCommandController extends \TYPO3\Flow\Cli\CommandController {
 			'planetNumber' => $planet->getPlanetNumber(),
 		);
 		$this->redisFacade->scheduleDelayedJob($data);
-		$planet->setStructureInProgress(1);
-		$planet->setStructureReadyTime($readyTime);
+		$structureBuildQueueItem = new \Lolli\Gaw\Domain\Model\PlanetStructureBuildQueueItem();
+		$structureBuildQueueItem->setName($structureName);
+		$structureBuildQueueItem->setReadyTime($readyTime);
+		$planet->addStructureToStructureBuildQueue($structureBuildQueueItem);
 		$this->planetRepository->update($planet);
 		$this->persistenceManager->persistAll();
 		$this->planetRepository->detach($planet);
 		return array('readyTime' => $readyTime);
 	}
 
+	/**
+	 * Increment a planet structure level
+	 *
+	 * @param array $data Queued data
+	 * @throws Exception
+	 */
 	protected function incrementPlanetStructure(array $data) {
-		//@TODO updateRessOnPlaniAtTime($data['time']);
+		// @TODO: updateRessOnPlaniAtTime($data['time']);
 		$structureName = $data['structureName'];
-		$incrementMethodName = 'increment' . ucfirst($structureName);
 		$planet = $this->planetRepository->findOneByPosition($data['galaxyNumber'], $data['systemNumber'], $data['planetNumber']);
+		$currentBuildQueue = $planet->getStructureBuildQueue();
+		if ($currentBuildQueue->count() < 1) {
+			throw new Exception(
+				'Expected to find at least one item in build queue, but it is empty', 1386609470
+			);
+		}
+		/** @var \Lolli\Gaw\Domain\Model\PlanetStructureBuildQueueItem $currentBuildQueueItem */
+		$currentBuildQueueItem = $currentBuildQueue->first();
+		if ($currentBuildQueueItem->getName() !== $data['structureName']) {
+			throw new Exception(
+				'Top most queue item name does not correspond with expected structure name', 1386609692
+			);
+		}
+		if ($currentBuildQueueItem->getReadyTime() !== (int)$data['time']) {
+			throw new Exception(
+				'Top most queue item ready time does not correspond with expected ready time', 1386609761
+			);
+		}
+		$incrementMethodName = 'increment' . ucfirst($structureName);
 		$planet->$incrementMethodName();
-		$planet->setStructureInProgress(0);
-		$planet->setStructureReadyTime(0);
+		$planet->removeStructureFromBuildQueue($currentBuildQueueItem);
 		$this->planetRepository->update($planet);
 		$this->persistenceManager->persistAll();
 		$this->planetRepository->detach($planet);
