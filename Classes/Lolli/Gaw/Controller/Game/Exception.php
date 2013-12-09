@@ -1,5 +1,5 @@
 <?php
-namespace Lolli\Gaw\Controller\Exception;
+namespace Lolli\Gaw\Controller\Game;
 
 /*                                                                        *
  * This script belongs to the TYPO3 Flow package "Lolli.Gaw".             *
@@ -12,8 +12,8 @@ namespace Lolli\Gaw\Controller\Exception;
  *                                                                        */
 
 /**
- * Generic controller exception
+ * Generic game controller exception
  */
-class ArgumentException extends \Lolli\Gaw\Controller\Exception {
+class Exception extends \Lolli\Gaw\Controller\Exception {
 
 }

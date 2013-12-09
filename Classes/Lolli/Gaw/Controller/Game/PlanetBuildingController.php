@@ -1,5 +1,5 @@
 <?php
-namespace Lolli\Gaw\Controller;
+namespace Lolli\Gaw\Controller\Game;
 
 /*                                                                        *
  * This script belongs to the TYPO3 Flow package "Lolli.Gaw".             *
@@ -19,13 +19,7 @@ use Lolli\Gaw\Domain\Model\Planet;
  *
  * @Flow\Scope("singleton")
  */
-class PlanetBuildingController extends \TYPO3\Flow\Mvc\Controller\ActionController {
-
-	/**
-	 * @Flow\Inject
-	 * @var \TYPO3\Flow\Security\Context
-	 */
-	protected $securityContext;
+class PlanetBuildingController extends AbstractGameController {
 
 	/**
 	 * @Flow\Inject
@@ -43,26 +37,21 @@ class PlanetBuildingController extends \TYPO3\Flow\Mvc\Controller\ActionControll
 	 * Show planet buildings
 	 */
 	public function indexAction() {
-		/** @var \Lolli\Gaw\Domain\Model\Player $player */
-		$player = $this->securityContext->getPartyByType('Lolli\Gaw\Domain\Model\Player');
-		$planet = $player->getSelectedPlanet();
 		$data = array(
 			'command' => 'updateResourcesOnPlanet',
-			'tags' => array($planet->getPlanetPositionString()),
-			'galaxyNumber' => $planet->getGalaxyNumber(),
-			'systemNumber' => $planet->getSystemNumber(),
-			'planetNumber' => $planet->getPlanetNumber(),
+			'tags' => array($this->selectedPlanet->getPlanetPositionString()),
+			'galaxyNumber' => $this->selectedPlanet->getGalaxyNumber(),
+			'systemNumber' => $this->selectedPlanet->getSystemNumber(),
+			'planetNumber' => $this->selectedPlanet->getPlanetNumber(),
 		);
 		$this->redisFacade->scheduleBlockingJob($data);
 		// Update planet data after some worker updated it
-		$this->planetRepository->refresh($planet);
+		$this->planetRepository->refresh($this->selectedPlanet);
 
 		$planetCalculationService = new \Lolli\Gaw\Service\PlanetCalculationService();
 
 		$this->view->assignMultiple(
 			array(
-				'player' => $player,
-				'selectedPlanet' => $planet,
 				'structureTechTree' => $planetCalculationService->getStructureTechTree(),
 				'realTime' => $this->redisFacade->getRealTimeNow(),
 				'gameTime' => $this->redisFacade->getGameTimeNow(),

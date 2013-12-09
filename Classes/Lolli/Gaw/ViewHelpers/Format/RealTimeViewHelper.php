@@ -45,5 +45,4 @@ class RealTimeViewHelper extends AbstractViewHelper {
 		$date->setTimezone($timezone);
 		return $date->format('d.m.Y H:i:s');
 	}
-
 }

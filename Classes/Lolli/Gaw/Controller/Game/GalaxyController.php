@@ -1,5 +1,5 @@
 <?php
-namespace Lolli\Gaw\Controller;
+namespace Lolli\Gaw\Controller\Game;
 
 /*                                                                        *
  * This script belongs to the TYPO3 Flow package "Lolli.Gaw".             *
@@ -18,13 +18,7 @@ use TYPO3\Flow\Annotations as Flow;
  *
  * @Flow\Scope("singleton")
  */
-class GalaxyController extends \TYPO3\Flow\Mvc\Controller\ActionController {
-
-	/**
-	 * @Flow\Inject
-	 * @var \TYPO3\Flow\Security\Context
-	 */
-	protected $securityContext;
+class GalaxyController extends AbstractGameController {
 
 	/**
 	 * @Flow\Inject
@@ -40,15 +34,12 @@ class GalaxyController extends \TYPO3\Flow\Mvc\Controller\ActionController {
 	 * @throws Exception\ArgumentException
 	 */
 	public function indexAction($galaxy = NULL, $system = NULL) {
-		/** @var \Lolli\Gaw\Domain\Model\Player $player */
-		$player = $this->securityContext->getPartyByType('Lolli\Gaw\Domain\Model\Player');
 		if (is_null($galaxy) || is_null($system)) {
-			$selectedPlanet = $player->getSelectedPlanet();
 			if (is_null($galaxy)) {
-				$galaxy = $selectedPlanet->getGalaxyNumber();
+				$galaxy = $this->selectedPlanet->getGalaxyNumber();
 			}
 			if (is_null($system)) {
-				$system = $selectedPlanet->getSystemNumber();
+				$system = $this->selectedPlanet->getSystemNumber();
 			}
 		}
 
@@ -82,8 +73,6 @@ class GalaxyController extends \TYPO3\Flow\Mvc\Controller\ActionController {
 		}
 		$this->view->assignMultiple(
 			array(
-				'player' => $player,
-				'selectedPlanet' => $player->getSelectedPlanet(),
 				'galaxy' => $galaxy,
 				'nextGalaxy' => $nextGalaxy,
 				'previousGalaxy' => $previousGalaxy,

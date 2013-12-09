@@ -12,7 +12,7 @@
 			<f:form
 				method="post"
 				action="selectPlanet"
-				controller="player"
+				controller="Game\Player"
 				object="{player}"
 				objectName="player"
 				id="lolli-gaw-player-selectPlanet"
@@ -27,10 +27,10 @@
 
 			<section class="section">
 				<h5 class="title">
-					<f:link.action action="index" controller="PlanetBuilding">Planetausbau</f:link.action>
+					<f:link.action action="index" controller="Game\PlanetBuilding">Planetausbau</f:link.action>
 				</h5>
 				<h5 class="title">
-					<f:link.action action="index" controller="Galaxy">Galaxie</f:link.action>
+					<f:link.action action="index" controller="Game\Galaxy">Galaxie</f:link.action>
 				</h5>
 				<h5 class="title">
 					<f:link.action action="logout" controller="Authentication">Logout</f:link.action>

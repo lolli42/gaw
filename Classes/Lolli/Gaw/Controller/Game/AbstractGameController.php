@@ -1,5 +1,5 @@
 <?php
-namespace Lolli\Gaw\Controller;
+namespace Lolli\Gaw\Controller\Game;
 
 /*                                                                        *
  * This script belongs to the TYPO3 Flow package "Lolli.Gaw".             *
@@ -14,11 +14,11 @@ namespace Lolli\Gaw\Controller;
 use TYPO3\Flow\Annotations as Flow;
 
 /**
- * Player controller
+ * Abstract game controller implement common game controller stuff
  *
  * @Flow\Scope("singleton")
  */
-class PlayerController extends \TYPO3\Flow\Mvc\Controller\ActionController {
+abstract class AbstractGameController extends \TYPO3\Flow\Mvc\Controller\ActionController {
 
 	/**
 	 * @Flow\Inject
@@ -27,16 +27,34 @@ class PlayerController extends \TYPO3\Flow\Mvc\Controller\ActionController {
 	protected $securityContext;
 
 	/**
-	 * @Flow\Inject
-	 * @var \Lolli\Gaw\Domain\Repository\PlayerRepository
+	 * @var \Lolli\Gaw\Domain\Model\Player
 	 */
-	protected $playerRepository;
+	protected $player;
 
 	/**
-	 * @param \Lolli\Gaw\Domain\Model\Player $player
+	 * @var \Lolli\Gaw\Domain\Model\Planet
 	 */
-	public function selectPlanetAction(\Lolli\Gaw\Domain\Model\Player $player) {
-		$this->playerRepository->update($player);
-		$this->redirect('index', 'planetBuilding');
+	protected $selectedPlanet;
+
+	/**
+	 * Set up common stuff
+	 */
+	protected function initializeAction() {
+		/** @var \Lolli\Gaw\Domain\Model\Player $player */
+		$player = $this->securityContext->getPartyByType('Lolli\Gaw\Domain\Model\Player');
+		$this->player = $player;
+		$this->selectedPlanet = $player->getSelectedPlanet();
+	}
+
+	/**
+	 * Assign common objects to view
+	 */
+	protected function initializeView() {
+		$this->view->assignMultiple(
+			array(
+				'player' => $this->player,
+				'selectedPlanet' => $this->player->getSelectedPlanet(),
+			)
+		);
 	}
 }
