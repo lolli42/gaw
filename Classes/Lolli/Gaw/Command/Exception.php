@@ -12,7 +12,7 @@ namespace Lolli\Gaw\Command;
  *                                                                        */
 
 /**
- * Generic exception
+ * Generic command exception
  */
 class Exception extends \Lolli\Gaw\Exception {
 

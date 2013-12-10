@@ -20,6 +20,10 @@
 			<trans-unit id="planet.energyMine" xml:space="preserve">
 				<source>Kraftwerk</source>
 			</trans-unit>
+
+			<trans-unit id="worker.exception.123" xml:space="preserve">
+				<source>Dummy Fehler</source>
+			</trans-unit>
 		</body>
 	</file>
 </xliff>

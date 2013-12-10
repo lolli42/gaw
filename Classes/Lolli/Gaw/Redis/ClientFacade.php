@@ -14,18 +14,22 @@ namespace Lolli\Gaw\Redis;
 use TYPO3\Flow\Annotations as Flow;
 
 /**
- * A redis "web" client
+ * Redis facade for "client"
  *
  * @Flow\Scope("singleton")
  */
 class ClientFacade extends RedisFacade {
 
 	/**
-	 * @param array $data
-	 * @return array
-	 * @throws Exception
+	 * Put a job into queue and wait until it is finished.
+	 * This allows direct feedback from worker.
+	 *
+	 * @param array $data Queue data
+	 * @return array Feedback, contains at least 'success' boolean key
+	 * @throws Exception If there is no response within recent time
 	 */
 	public function scheduleBlockingJob(array $data) {
+		$this->testDispatcherIsRunning();
 		$clientBlocking = uniqid('lolli:gaw:client:blocking:');
 		$data['clientBlockingOn'] = $clientBlocking;
 		$this->scheduleNowJob($data);
@@ -36,6 +40,12 @@ class ClientFacade extends RedisFacade {
 		return json_decode($feedback[1], TRUE);
 	}
 
+	/**
+	 * Schedule a job to be executed "now".
+	 * Does not wait for a result.
+	 *
+	 * @param array $data Queue data
+	 */
 	public function scheduleNowJob(array $data) {
 		$this->testDispatcherIsRunning();
 		$time = $this->getGameTimeNow();
@@ -45,7 +55,7 @@ class ClientFacade extends RedisFacade {
 	}
 
 	/**
-	 * If saved realtime and "now" differs for some seconds, it
+	 * If saved real time and "now" differs for some seconds, it
 	 * is assumed that the dispatcher is down.
 	 *
 	 * @throws Exception

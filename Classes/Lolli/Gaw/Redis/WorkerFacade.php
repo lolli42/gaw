@@ -14,7 +14,7 @@ namespace Lolli\Gaw\Redis;
 use TYPO3\Flow\Annotations as Flow;
 
 /**
- * Redis object for "worker"
+ * Redis facade for "worker"
  *
  * @Flow\Scope("singleton")
  */

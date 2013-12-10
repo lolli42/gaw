@@ -1,5 +1,5 @@
 <?php
-namespace Lolli\Gaw\Redis;
+namespace Lolli\Gaw\Command\Exception;
 
 /*                                                                        *
  * This script belongs to the TYPO3 Flow package "Lolli.Gaw".             *
@@ -11,22 +11,13 @@ namespace Lolli\Gaw\Redis;
  * The TYPO3 project - inspiring people to share!                         *
  *                                                                        */
 
-use TYPO3\Flow\Annotations as Flow;
-
 /**
- * Redis facade for "dispatcher"
+ * Catchable command worker exception
  *
- * @Flow\Scope("singleton")
+ * Thrown if worker commands are "ok" to fail, usually for "blocking"
+ * "client" triggered jobs. Main worker loop catches those and gives
+ * the message back to clients who translate them to a flash message.
  */
-class DispatcherFacade extends RedisFacade {
+class CatchableWorkerException extends \Lolli\Gaw\Command\Exception {
 
-	/**
-	 * Get redis instance directly, public for dispatcher so
-	 * dispatcher can call redis methods directly.
-	 *
-	 * @return \Redis
-	 */
-	public function getRedis() {
-		return parent::getRedis();
-	}
 }

@@ -13,6 +13,9 @@ Lolli:
           logout:
             actionName: index
             controllerName: Authentication
+    Game:
+      Planet:
+        maximumStructureQueueLength: 3
 
 TYPO3:
   Flow:

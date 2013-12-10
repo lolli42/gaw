@@ -44,7 +44,8 @@ class PlanetBuildingController extends AbstractGameController {
 			'systemNumber' => $this->selectedPlanet->getSystemNumber(),
 			'planetNumber' => $this->selectedPlanet->getPlanetNumber(),
 		);
-		$this->redisFacade->scheduleBlockingJob($data);
+		$result = $this->redisFacade->scheduleBlockingJob($data);
+		$this->createFlashMessageFromWorkerResult($result);
 		// Update planet data after some worker updated it
 		$this->planetRepository->refresh($this->selectedPlanet);
 
@@ -53,6 +54,7 @@ class PlanetBuildingController extends AbstractGameController {
 		$this->view->assignMultiple(
 			array(
 				'structureTechTree' => $planetCalculationService->getStructureTechTree(),
+				'currentStructureBuildQueueLength' => $this->selectedPlanet->getStructureBuildQueue()->count(),
 				'realTime' => $this->redisFacade->getRealTimeNow(),
 				'gameTime' => $this->redisFacade->getGameTimeNow(),
 			)
@@ -60,7 +62,7 @@ class PlanetBuildingController extends AbstractGameController {
 	}
 
 	/**
-	 * Queue building a planet structure
+	 * Add a structure in planet structure queue
 	 *
 	 * @param Planet $planet
 	 * @param string $structureName
@@ -78,9 +80,8 @@ class PlanetBuildingController extends AbstractGameController {
 			'systemNumber' => $planet->getSystemNumber(),
 			'planetNumber' => $planet->getPlanetNumber(),
 		);
-		// @TODO: Handle result? It is currently readyTime, or some error message if job did not succeed.
-		$success = $this->redisFacade->scheduleBlockingJob($data);
-		$this->addFlashMessage('Planet wird ausgebaut');
+		$result = $this->redisFacade->scheduleBlockingJob($data);
+		$this->createFlashMessageFromWorkerResult($result, 'Planet wird ausgebaut');
 		$this->planetRepository->refresh($planet);
 		$this->redirect('index');
 	}

@@ -57,4 +57,37 @@ abstract class AbstractGameController extends \TYPO3\Flow\Mvc\Controller\ActionC
 			)
 		);
 	}
+
+	/**
+	 * A worker always gives an array with element success set to TRUE or FALSE.
+	 * If success is true, the given success message is added as flash message if given
+	 * If success is false, a flash message is created from given exception code
+	 *
+	 * @param array $result
+	 * @param string|null $successMessage
+	 * @throws Exception
+	 */
+	protected function createFlashMessageFromWorkerResult(array $result, $successMessage = NULL) {
+		if (!isset($result['success'])) {
+			throw new Exception('Success key not given in worker result', 1386686716);
+		}
+		if ($result['success'] === TRUE) {
+			if (!is_null($successMessage)) {
+				$this->addFlashMessage($successMessage);
+			}
+		} else {
+			if (!isset($result['exceptionMessage']) || !isset($result['exceptionCode'])) {
+				throw new Exception('Worker was not successful but did not add exception data', 1386686709);
+			}
+			/** @var \TYPO3\Flow\I18n\Translator $translator */
+			$translator = $this->objectManager->get('TYPO3\Flow\I18n\Translator');
+			$id = 'worker.exception.' . $result['exceptionCode'];
+			$translation = $translator->translateById($id, array(), NULL, NULL, 'Main', 'Lolli.Gaw');
+			if ($translation === $id) {
+				// Fall back to exception message from worker if there is no translation
+				$translation = $result['exceptionMessage'];
+			}
+			$this->addFlashMessage($translation, \TYPO3\Flow\Error\Message::SEVERITY_WARNING);
+		}
+	}
 }

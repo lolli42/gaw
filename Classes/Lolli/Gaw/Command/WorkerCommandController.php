@@ -56,7 +56,14 @@ class WorkerCommandController extends \TYPO3\Flow\Cli\CommandController {
 			$jobArray = $this->redisFacade->getJobArrayFromJob($job);
 			var_dump($jobArray);
 			$command = $jobArray['command'];
-			$result = $this->$command($jobArray);
+			try {
+				$result = $this->$command($jobArray);
+				$result['success'] = TRUE;
+			} catch (Exception\CatchableWorkerException $e) {
+				$result['success'] = FALSE;
+				$result['exceptionMessage'] = $e->getMessage();
+				$result['exceptionCode'] = $e->getCode();
+			}
 			if (!empty($jobArray['clientBlockingOn'])) {
 				$this->redisFacade->pushClientFeedback($jobArray['clientBlockingOn'], $result);
 			}
@@ -77,11 +84,12 @@ class WorkerCommandController extends \TYPO3\Flow\Cli\CommandController {
 		$this->planetRepository->update($planet);
 		$this->persistenceManager->persistAll();
 		$this->planetRepository->detach($planet);
-		return array('foo');
+		return array();
 	}
 
 	/**
 	 * Find a not settled planet position and create a planet here
+	 * Triggered by "client"
 	 *
 	 * @param array $data Data to work on - unused here
 	 * @return array Result data
@@ -115,6 +123,7 @@ class WorkerCommandController extends \TYPO3\Flow\Cli\CommandController {
 
 	/**
 	 * Add a structure to planet build queue
+	 * Triggered by "client"
 	 *
 	 * @param array $data Data to work on
 	 * @return array Result
@@ -143,11 +152,14 @@ class WorkerCommandController extends \TYPO3\Flow\Cli\CommandController {
 		$this->planetRepository->update($planet);
 		$this->persistenceManager->persistAll();
 		$this->planetRepository->detach($planet);
-		return array('readyTime' => $readyTime);
+		return array(
+			'readyTime' => $readyTime
+		);
 	}
 
 	/**
 	 * Increment a planet structure level
+	 * Triggered by "worker"
 	 *
 	 * @param array $data Queued data
 	 * @throws Exception
@@ -158,19 +170,19 @@ class WorkerCommandController extends \TYPO3\Flow\Cli\CommandController {
 		$planet = $this->planetRepository->findOneByPosition($data['galaxyNumber'], $data['systemNumber'], $data['planetNumber']);
 		$currentBuildQueue = $planet->getStructureBuildQueue();
 		if ($currentBuildQueue->count() < 1) {
-			throw new Exception(
+			throw new Exception\WorkerException(
 				'Expected to find at least one item in build queue, but it is empty', 1386609470
 			);
 		}
 		/** @var \Lolli\Gaw\Domain\Model\PlanetStructureBuildQueueItem $currentBuildQueueItem */
 		$currentBuildQueueItem = $currentBuildQueue->first();
 		if ($currentBuildQueueItem->getName() !== $data['structureName']) {
-			throw new Exception(
+			throw new Exception\WorkerException(
 				'Top most queue item name does not correspond with expected structure name', 1386609692
 			);
 		}
 		if ($currentBuildQueueItem->getReadyTime() !== (int)$data['time']) {
-			throw new Exception(
+			throw new Exception\WorkerException(
 				'Top most queue item ready time does not correspond with expected ready time', 1386609761
 			);
 		}

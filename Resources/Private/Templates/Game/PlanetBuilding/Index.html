@@ -28,7 +28,15 @@
 		<thead>
 			<tr>
 				<th colspan="2">
-					Laufende Bauaufträge <span class="entity-available">[{selectedPlanet.structureBuildQueue -> f:count()}]</span>
+					Laufende Bauaufträge
+					<f:if condition="{currentStructureBuildQueueLength} >= {settings.Game.Planet.maximumStructureQueueLength}">
+						<f:then>
+							<span class="entity-not-available">[{currentStructureBuildQueueLength}]</span>
+						</f:then>
+						<f:else>
+							<span class="entity-available">[{currentStructureBuildQueueLength}]</span>
+						</f:else>
+					</f:if>
 				</th>
 			</tr>
 		</thead>
@@ -72,10 +80,12 @@
 						<span class="entity-available">[{selectedPlanet -> gaw:property(propertyName: structureName)}]</span>
 					</td>
 					<td>
-						<f:form action="addStructureToBuildQueue" object="{selectedPlanet}" objectName="planet">
-							<f:form.hidden value="{structureName}" name="structureName" />
-							<f:form.submit value="Ausbauen" />
-						</f:form>
+						<f:if condition="{currentStructureBuildQueueLength} < {settings.Game.Planet.maximumStructureQueueLength}">
+							<f:form action="addStructureToBuildQueue" object="{selectedPlanet}" objectName="planet">
+								<f:form.hidden value="{structureName}" name="structureName" />
+								<f:form.submit value="Ausbauen" />
+							</f:form>
+						</f:if>
 					</td>
 				</tr>
 			</f:if>
