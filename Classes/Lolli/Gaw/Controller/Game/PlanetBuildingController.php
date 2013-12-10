@@ -53,10 +53,11 @@ class PlanetBuildingController extends AbstractGameController {
 
 		$this->view->assignMultiple(
 			array(
-				'structureTechTree' => $planetCalculationService->getStructureTechTree(),
-				'currentStructureBuildQueueLength' => $this->selectedPlanet->getStructureBuildQueue()->count(),
 				'realTime' => $this->redisFacade->getRealTimeNow(),
 				'gameTime' => $this->redisFacade->getGameTimeNow(),
+				'structureTechTree' => $planetCalculationService->getStructureTechTree(),
+				'currentStructureBuildQueueLength' => $this->selectedPlanet->getStructureBuildQueue()->count(),
+				'pointsByStructure' => $planetCalculationService->getPointsByStructure(),
 			)
 		);
 	}

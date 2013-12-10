@@ -188,6 +188,8 @@ class WorkerCommandController extends \TYPO3\Flow\Cli\CommandController {
 		}
 		$incrementMethodName = 'increment' . ucfirst($structureName);
 		$planet->$incrementMethodName();
+		$planetPoints = $this->planetCalculationService->calculateTotalPoints($planet);
+		$planet->setPoints($planetPoints);
 		$planet->removeStructureFromBuildQueue($currentBuildQueueItem);
 		$this->planetRepository->update($planet);
 		$this->persistenceManager->persistAll();

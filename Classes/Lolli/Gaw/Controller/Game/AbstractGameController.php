@@ -43,6 +43,7 @@ abstract class AbstractGameController extends \TYPO3\Flow\Mvc\Controller\ActionC
 		/** @var \Lolli\Gaw\Domain\Model\Player $player */
 		$player = $this->securityContext->getPartyByType('Lolli\Gaw\Domain\Model\Player');
 		$this->player = $player;
+		// @TODO: Check if $player is an object, otherwise don't
 		$this->selectedPlanet = $player->getSelectedPlanet();
 	}
 
@@ -53,6 +54,7 @@ abstract class AbstractGameController extends \TYPO3\Flow\Mvc\Controller\ActionC
 		$this->view->assignMultiple(
 			array(
 				'player' => $this->player,
+				// @TODO: $this->selected
 				'selectedPlanet' => $this->player->getSelectedPlanet(),
 			)
 		);

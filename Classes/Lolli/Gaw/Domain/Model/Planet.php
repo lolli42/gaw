@@ -20,14 +20,6 @@ use Doctrine\ORM\Mapping as ORM;
  */
 class Planet {
 
-	const STRUCTURE_NONE = 0;
-	const STRUCTURE_BASE = 1;
-	const STRUCTURE_IRON = 2;
-	const STRUCTURE_SILICON = 3;
-	const STRUCTURE_XENON = 4;
-	const STRUCTURE_HYDRAZINE = 5;
-	const STRUCTURE_ENERGY = 6;
-
 	/**
 	 * @var \Lolli\Gaw\Domain\Model\Player
 	 * @ORM\ManyToOne(inversedBy="planets")
@@ -62,6 +54,11 @@ class Planet {
 	 * @var string
 	 */
 	protected $name = '';
+
+	/**
+	 * @var int
+	 */
+	protected $points = 0;
 
 	/**
 	 * @var int
@@ -242,6 +239,20 @@ class Planet {
 	 */
 	public function getName() {
 		return $this->name;
+	}
+
+	/**
+	 * @param int $points
+	 */
+	public function setPoints($points) {
+		$this->points = $points;
+	}
+
+	/**
+	 * @return int
+	 */
+	public function getPoints() {
+		return $this->points;
 	}
 
 	/**

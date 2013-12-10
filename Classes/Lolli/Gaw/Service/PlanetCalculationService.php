@@ -63,6 +63,20 @@ class PlanetCalculationService {
 	);
 
 	/**
+	 * Points for each structure level
+	 *
+	 * @var array
+	 */
+	protected $pointsByStructure = array(
+		'base' => 25,
+		'ironMine' => 10,
+		'siliconMine' => 10,
+		'xenonMine' => 15,
+		'hydrazineMine' => 20,
+		'energyMine' => 25,
+	);
+
+	/**
 	 * Basic resource production
 	 *
 	 * @var array
@@ -82,6 +96,31 @@ class PlanetCalculationService {
 	 */
 	public function getStructureTechTree() {
 		return $this->structureTechTree;
+	}
+
+	/**
+	 * Get points by structure table
+	 *
+	 * @return array
+	 */
+	public function getPointsByStructure() {
+		return $this->pointsByStructure;
+	}
+
+	/**
+	 * Calculate points of planet
+	 *
+	 * @param Planet $planet The planet to work on
+	 * @return integer points
+	 */
+	public function calculateTotalPoints(Planet $planet) {
+		$pointsByStructure = $this->pointsByStructure;
+		$total = 0;
+		foreach ($pointsByStructure as $structureName => $points) {
+			$methodName = 'get' . ucfirst($structureName);
+			$total = $total + $planet->$methodName() * $points;
+		}
+		return $total;
 	}
 
 	/**
@@ -119,7 +158,7 @@ class PlanetCalculationService {
 	public function getBuildTimeOfStructure(Planet $planet, $structureName) {
 		// @TODO: Method needs to check queue if a base is queued for the same building already
 		// 10 secs
-		return 20000000;
+		return 10000000;
 		// return (int)(1000000 * ($planet->getBase() + 1)); // 32 * 60
 	}
 

@@ -131,4 +131,40 @@
 			</f:for>
 		</tbody>
 	</table>
+
+	<table>
+		<thead>
+			<tr>
+				<th colspan="3">
+					Planetenpunkte
+				</th>
+			</tr>
+		</thead>
+		<tbody>
+			<f:for each="{pointsByStructure}" as="points" key="structureName">
+				<tr>
+					<td>
+						<f:translate id="planet.{structureName}" />
+					</td>
+					<td>
+						{points}
+					</td>
+					<td>
+						<gaw:math.multiply
+							factorOne="{selectedPlanet -> gaw:property(propertyName: structureName)}"
+							factorTwo="{points}"
+						/>
+					</td>
+				</tr>
+			</f:for>
+			<tr>
+				<td colspan="2">
+					Summe
+				</td>
+				<td>
+					{selectedPlanet.points}
+				</td>
+			</tr>
+		</tbody>
+	</table>
 </f:section>
