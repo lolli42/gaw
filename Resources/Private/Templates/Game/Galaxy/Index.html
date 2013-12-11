@@ -61,6 +61,9 @@
 					Name
 				</th>
 				<th>
+					Spieler
+				</th>
+				<th>
 					Punkte
 				</th>
 			</tr>
@@ -75,6 +78,9 @@
 						<f:if condition="{planet.name}">
 							{planet.name}
 						</f:if>
+					</td>
+					<td>
+						<span>{planet.player.gameNick}</span>
 					</td>
 					<td>
 						{planet.points}
