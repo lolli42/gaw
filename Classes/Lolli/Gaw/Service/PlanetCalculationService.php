@@ -157,8 +157,8 @@ class PlanetCalculationService {
 	 */
 	public function getBuildTimeOfStructure(Planet $planet, $structureName) {
 		// @TODO: Method needs to check queue if a base is queued for the same building already
-		// 10 secs
-		return 10000000;
+		// 20 secs
+		return 20000000;
 		// return (int)(1000000 * ($planet->getBase() + 1)); // 32 * 60
 	}
 

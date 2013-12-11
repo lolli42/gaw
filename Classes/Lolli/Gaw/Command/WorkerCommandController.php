@@ -45,6 +45,18 @@ class WorkerCommandController extends \TYPO3\Flow\Cli\CommandController {
 	protected $persistenceManager;
 
 	/**
+	 * @var array
+	 */
+	protected $settings;
+
+	/**
+	 * @param array $settings
+	 */
+	public function injectSettings(array $settings) {
+		$this->settings = $settings;
+	}
+
+	/**
 	 * Main worker loop
 	 *
 	 * @return void
@@ -132,8 +144,16 @@ class WorkerCommandController extends \TYPO3\Flow\Cli\CommandController {
 		// @TODO: Stop if more than "n" building are queued already
 		// @TODO: Check if building is available according to tech tree
 		// @TODO: Handle structure in progress correctly
-		$structureName = $data['structureName'];
 		$planet = $this->planetRepository->findOneByPosition($data['galaxyNumber'], $data['systemNumber'], $data['planetNumber']);
+
+		// Do not queue if already maximum number of structures are in build queue
+		if ($planet->getStructureBuildQueue()->count() >= $this->settings['Game']['Planet']['maximumStructureQueueLength']) {
+			throw new Exception\CatchableWorkerException(
+				'Can not queue structure building, maximum queue length reached', 1386788435
+			);
+		}
+
+		$structureName = $data['structureName'];
 		$readyTime = $this->planetCalculationService->getReadyTimeOfStructure($planet, $structureName, $data['time']);
 		$data = array(
 			'command' => 'incrementPlanetStructure',
