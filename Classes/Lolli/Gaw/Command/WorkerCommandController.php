@@ -123,6 +123,7 @@ class WorkerCommandController extends \TYPO3\Flow\Cli\CommandController {
 		$planet->setSystemNumber($systemNumber);
 		$planet->setPlanetNumber($planetNumber);
 		$planet->setLastResourceUpdate($this->redisFacade->getGameTimeNow());
+		$planet->setPoints($this->planetCalculationService->calculateTotalPoints($planet));
 		$this->planetRepository->add($planet);
 		$this->persistenceManager->persistAll();
 		$this->planetRepository->detach($planet);
@@ -261,8 +262,7 @@ class WorkerCommandController extends \TYPO3\Flow\Cli\CommandController {
 		}
 		$incrementMethodName = 'increment' . ucfirst($structureName);
 		$planet->$incrementMethodName();
-		$planetPoints = $this->planetCalculationService->calculateTotalPoints($planet);
-		$planet->setPoints($planetPoints);
+		$planet->setPoints($this->planetCalculationService->calculateTotalPoints($planet));
 		$planet->removeStructureFromBuildQueue($currentBuildQueueItem);
 		$this->planetRepository->update($planet);
 		$this->persistenceManager->persistAll();
