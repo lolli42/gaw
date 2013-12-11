@@ -138,10 +138,10 @@ class WorkerCommandController extends \TYPO3\Flow\Cli\CommandController {
 	 * Triggered by "client"
 	 *
 	 * @param array $data Data to work on
+	 * @throws Exception\CatchableWorkerException
 	 * @return array Result
 	 */
 	protected function addPlanetStructureToBuildQueue(array $data) {
-		// @TODO: Stop if more than "n" building are queued already
 		// @TODO: Check if building is available according to tech tree
 		// @TODO: Handle structure in progress correctly
 		$planet = $this->planetRepository->findOneByPosition($data['galaxyNumber'], $data['systemNumber'], $data['planetNumber']);
@@ -155,6 +155,10 @@ class WorkerCommandController extends \TYPO3\Flow\Cli\CommandController {
 
 		$structureName = $data['structureName'];
 		$readyTime = $this->planetCalculationService->getReadyTimeOfStructure($planet, $structureName, $data['time']);
+
+		// Add increment job
+		// [!!!] This data and order (!) has to be the same data as in removeLastStructureFromBuildQueueAction()
+		// @TODO: Remove duplicate array definitions (all over the place, also in "client" controllers)
 		$data = array(
 			'command' => 'incrementPlanetStructure',
 			'structureName' => $structureName,
@@ -165,16 +169,65 @@ class WorkerCommandController extends \TYPO3\Flow\Cli\CommandController {
 			'planetNumber' => $planet->getPlanetNumber(),
 		);
 		$this->redisFacade->scheduleDelayedJob($data);
+
 		$structureBuildQueueItem = new \Lolli\Gaw\Domain\Model\PlanetStructureBuildQueueItem();
 		$structureBuildQueueItem->setName($structureName);
 		$structureBuildQueueItem->setReadyTime($readyTime);
 		$planet->addStructureToStructureBuildQueue($structureBuildQueueItem);
 		$this->planetRepository->update($planet);
 		$this->persistenceManager->persistAll();
+		// @TODO: Detach the queue item here, too? If so: Refactor detach to own class separated from repo?
 		$this->planetRepository->detach($planet);
+
 		return array(
 			'readyTime' => $readyTime
 		);
+	}
+
+	/**
+	 * Remove the last item from planet build queue
+	 * Triggered by "client"
+	 *
+	 * @param array $data Data to work on
+	 * @throws Exception\CatchableWorkerException
+	 * @return array Result
+	 */
+	protected function removeLastStructureFromBuildQueue(array $data) {
+		// @TODO: Give back resources
+		$planet = $this->planetRepository->findOneByPosition($data['galaxyNumber'], $data['systemNumber'], $data['planetNumber']);
+
+		// Stop if queue is empty
+		$planetStructureQueue = $planet->getStructureBuildQueue();
+		if ($planetStructureQueue->isEmpty()) {
+			throw new Exception\CatchableWorkerException(
+				'Can not cancel planet structure build queue item, queue is empty', 1386789606
+			);
+		}
+
+		/** @var \Lolli\Gaw\Domain\Model\PlanetStructureBuildQueueItem $lastQueueItem */
+		$lastQueueItem = $planetStructureQueue->last();
+
+		// Cancel 'increment' job
+		// [!!!] This data and order (!) has to be the same as data in addPlanetStructureToBuildQueue()
+		// @TODO: Remove duplicate array definitions (all over the place, also in "client" controllers)
+		$data = array(
+			'command' => 'incrementPlanetStructure',
+			'structureName' => $lastQueueItem->getName(),
+			'tags' => array($planet->getPlanetPositionString()),
+			'time' => $lastQueueItem->getReadyTime(),
+			'galaxyNumber' => $planet->getGalaxyNumber(),
+			'systemNumber' => $planet->getSystemNumber(),
+			'planetNumber' => $planet->getPlanetNumber(),
+		);
+		// Method will throw an exception if job was not found, we can safely continue here if it doesn't
+		$this->redisFacade->removeOneScheduledJob($data);
+
+		// Remove queue item
+		$planetStructureQueue->removeElement($lastQueueItem);
+		$this->planetRepository->update($planet);
+		$this->persistenceManager->persistAll();
+		// @TODO: Detach the queue item here, too? If so: Refactor detach to own class separated from repo?
+		$this->planetRepository->detach($planet);
 	}
 
 	/**

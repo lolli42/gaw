@@ -63,7 +63,7 @@ class PlanetBuildingController extends AbstractGameController {
 	}
 
 	/**
-	 * Add a structure in planet structure queue
+	 * Add a structure in planet structure build queue
 	 *
 	 * @param Planet $planet
 	 * @param string $structureName
@@ -83,7 +83,34 @@ class PlanetBuildingController extends AbstractGameController {
 		);
 		$result = $this->redisFacade->scheduleBlockingJob($data);
 		$this->createFlashMessageFromWorkerResult($result, 'Planet wird ausgebaut');
+		// Refresh to get updated worker data in forwarded action for this planet
 		$this->planetRepository->refresh($planet);
-		$this->redirect('index');
+		$this->forward('index');
+	}
+
+	/**
+	 * Remove the last item from planet structure build queue
+	 *
+	 * @param Planet $planet
+	 */
+	public function removeLastStructureFromBuildQueueAction(Planet $planet) {
+		// @TODO: Maybe this needs to be refactored. Currently this always only
+		// removes the 'last' queue item, no matter which one it is. If there are
+		// for example 2 tabs of the game, and both are clicked 'cancel', then
+		// the second one may not cancel the expected item from the list, there is
+		// currently no identifier used. client should submit 'time' to worker and
+		// worker should check "last" item with "time" to see if the job matches.
+		$data = array(
+			'command' => 'removeLastStructureFromBuildQueue',
+			'tags' => array($planet->getPlanetPositionString()),
+			'galaxyNumber' => $planet->getGalaxyNumber(),
+			'systemNumber' => $planet->getSystemNumber(),
+			'planetNumber' => $planet->getPlanetNumber(),
+		);
+		$result = $this->redisFacade->scheduleBlockingJob($data);
+		$this->createFlashMessageFromWorkerResult($result, 'Ausbau abgebrochen');
+		// Refresh to get updated worker data in forwarded action for this planet
+		$this->planetRepository->refresh($planet);
+		$this->forward('index');
 	}
 }

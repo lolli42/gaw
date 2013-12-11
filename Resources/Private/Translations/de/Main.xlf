@@ -24,6 +24,9 @@
 			<trans-unit id="worker.exception.1386788435" xml:space="preserve">
 				<source>Bearbeitung des Bauauftrag ist fehlgeschlagen, die Bauschleife hat die maximale Anzahl an Gebäude erreicht.</source>
 			</trans-unit>
+			<trans-unit id="worker.exception.1386789606" xml:space="preserve">
+				<source>Abbruch des Auftrags fehlgeschlagen, die Bauschleife ist leer.</source>
+			</trans-unit>
 		</body>
 	</file>
 </xliff>

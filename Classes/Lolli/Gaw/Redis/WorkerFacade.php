@@ -49,4 +49,19 @@ class WorkerFacade extends RedisFacade {
 	public function scheduleDelayedJob(array $data) {
 		$this->redis->zAdd('lolli:gaw:mainQueue', $data['time'], json_encode($data));
 	}
+
+	/**
+	 * Remove a job from main queue
+	 *
+	 * @param array $data
+	 * @throws Exception
+	 */
+	public function removeOneScheduledJob(array $data) {
+		$result = $this->redis->zrem('lolli:gaw:mainQueue', json_encode($data));
+		if ($result !== 1) {
+			throw new Exception(
+				'Expected to remove exactly one command from queue, but result is ' . $result, 1386797216
+			);
+		}
+	}
 }
