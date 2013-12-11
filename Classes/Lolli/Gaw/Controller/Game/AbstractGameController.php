@@ -42,9 +42,11 @@ abstract class AbstractGameController extends \TYPO3\Flow\Mvc\Controller\ActionC
 	protected function initializeAction() {
 		/** @var \Lolli\Gaw\Domain\Model\Player $player */
 		$player = $this->securityContext->getPartyByType('Lolli\Gaw\Domain\Model\Player');
-		$this->player = $player;
-		// @TODO: Check if $player is an object, otherwise don't
-		$this->selectedPlanet = $player->getSelectedPlanet();
+		// This may not be an object if session expired, initialize is not covered by security policy
+		if ($player instanceof \Lolli\Gaw\Domain\Model\Player) {
+			$this->player = $player;
+			$this->selectedPlanet = $player->getSelectedPlanet();
+		}
 	}
 
 	/**
@@ -54,8 +56,7 @@ abstract class AbstractGameController extends \TYPO3\Flow\Mvc\Controller\ActionC
 		$this->view->assignMultiple(
 			array(
 				'player' => $this->player,
-				// @TODO: $this->selected
-				'selectedPlanet' => $this->player->getSelectedPlanet(),
+				'selectedPlanet' => $this->selectedPlanet,
 			)
 		);
 	}
