@@ -13,13 +13,11 @@ namespace Lolli\Gaw\ViewHelpers\Planet;
 
 use TYPO3\Fluid\Core\ViewHelper\AbstractViewHelper;
 use TYPO3\Flow\Annotations as Flow;
-use Lolli\Gaw\Domain\Model\Planet;
 
 /**
- * Whether a structure can be build according to tech tree.
- * Usually used within f:if
+ * Array with required resources for structure level
  */
-class IsStructureAvailableViewHelper extends AbstractViewHelper {
+class RequiredResourcesForStructureLevelViewHelper extends AbstractViewHelper {
 
 	/**
 	 * @Flow\Inject
@@ -30,18 +28,12 @@ class IsStructureAvailableViewHelper extends AbstractViewHelper {
 	/**
 	 * TRUE if given structure can be build according to tech tree
 	 *
-	 * @param integer $structureName The structure to build
-	 * @param Planet $planet The planet to check
+	 * @param string $structureName The structure name, eg 'ironMine'
+	 * @param integer $level Level to calculate
 	 * @throws Exception
-	 * @return boolean TRUE if structure is available
+	 * @return array Required resources, key is name, value is micro units
 	 */
-	public function render($structureName, $planet = NULL) {
-		if ($planet === NULL) {
-			$planet = $this->renderChildren();
-		}
-		if (!($planet instanceof Planet)) {
-			throw new Exception('Not a planet given', 1386596030);
-		}
-		return $this->planetCalculationService->isStructureAvailable($planet, $structureName);
+	public function render($structureName, $level) {
+		return $this->planetCalculationService->getResourcesRequiredForStructureLevel($structureName, $level);
 	}
 }

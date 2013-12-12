@@ -28,14 +28,6 @@ class UnitViewHelperTest extends \TYPO3\Flow\Tests\UnitTestCase {
 		$this->viewHelper = $this->getMock('Lolli\Gaw\ViewHelpers\Format\UnitViewHelper', array('renderChildren'));
 	}
 
-	/**
-	 * @test
-	 * @expectedException \Lolli\Gaw\ViewHelpers\Format\Exception
-	 */
-	public function renderThrowsExceptionIfUnitIsNotAnInteger() {
-		$this->viewHelper->render(array());
-	}
-
 	public function valueDataProvider() {
 		return array(
 			// valid values

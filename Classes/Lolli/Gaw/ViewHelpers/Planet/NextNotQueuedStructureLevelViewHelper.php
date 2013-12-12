@@ -16,10 +16,10 @@ use TYPO3\Flow\Annotations as Flow;
 use Lolli\Gaw\Domain\Model\Planet;
 
 /**
- * Whether a structure can be build according to tech tree.
- * Usually used within f:if
+ * Get next structure level that is not queued yet.
+ * Example: base is 4, and 2 other bases are queued, it will return 7
  */
-class IsStructureAvailableViewHelper extends AbstractViewHelper {
+class NextNotQueuedStructureLevelViewHelper extends AbstractViewHelper {
 
 	/**
 	 * @Flow\Inject
@@ -28,9 +28,9 @@ class IsStructureAvailableViewHelper extends AbstractViewHelper {
 	protected $planetCalculationService;
 
 	/**
-	 * TRUE if given structure can be build according to tech tree
+	 * Next level
 	 *
-	 * @param integer $structureName The structure to build
+	 * @param string $structureName The structure to find next level for
 	 * @param Planet $planet The planet to check
 	 * @throws Exception
 	 * @return boolean TRUE if structure is available
@@ -40,8 +40,16 @@ class IsStructureAvailableViewHelper extends AbstractViewHelper {
 			$planet = $this->renderChildren();
 		}
 		if (!($planet instanceof Planet)) {
-			throw new Exception('Not a planet given', 1386596030);
+			throw new Exception('Not a planet given', 1386880868);
 		}
-		return $this->planetCalculationService->isStructureAvailable($planet, $structureName);
+		$method = 'get' . ucfirst($structureName);
+		// @TODO: Better with a real whitelist? This could access all getters
+		if (!method_exists($planet, $method)) {
+			throw new Exception('Structure does not exist', 1386879358);
+		}
+		$offset = 1;
+		$currentLevel = $planet->$method();
+		$inQueue = $this->planetCalculationService->countSpecificStructuresInBuildQueue($planet, $structureName);
+		return $offset + $currentLevel + $inQueue;
 	}
 }

@@ -21,8 +21,42 @@
 				<source>Kraftwerk</source>
 			</trans-unit>
 
+			<trans-unit id="resource.iron" xml:space="preserve">
+				<source>Eisen</source>
+			</trans-unit>
+			<trans-unit id="resource.short.iron" xml:space="preserve">
+				<source>Fe</source>
+			</trans-unit>
+			<trans-unit id="resource.silicon" xml:space="preserve">
+				<source>Silizium</source>
+			</trans-unit>
+			<trans-unit id="resource.short.silicon" xml:space="preserve">
+				<source>Si</source>
+			</trans-unit>
+			<trans-unit id="resource.xenon" xml:space="preserve">
+				<source>Xenon</source>
+			</trans-unit>
+			<trans-unit id="resource.short.xenon" xml:space="preserve">
+				<source>Xe</source>
+			</trans-unit>
+			<trans-unit id="resource.hydrazine" xml:space="preserve">
+				<source>Hydrazin</source>
+			</trans-unit>
+			<trans-unit id="resource.short.hydrazine" xml:space="preserve">
+				<source>Hy</source>
+			</trans-unit>
+			<trans-unit id="resource.energy" xml:space="preserve">
+				<source>Energie</source>
+			</trans-unit>
+			<trans-unit id="resource.short.energy" xml:space="preserve">
+				<source>Nrg</source>
+			</trans-unit>
+
 			<trans-unit id="worker.exception.1386788435" xml:space="preserve">
 				<source>Bearbeitung des Bauauftrag ist fehlgeschlagen, die Bauschleife hat die maximale Anzahl an Gebäude erreicht.</source>
+			</trans-unit>
+			<trans-unit id="worker.exception.1386887424" xml:space="preserve">
+				<source>Bearbeitung des Bauauftrag ist fehlgeschlagen, nicht genug Rohstoffe vorhanden.</source>
 			</trans-unit>
 			<trans-unit id="worker.exception.1386789606" xml:space="preserve">
 				<source>Abbruch des Auftrags fehlgeschlagen, die Bauschleife ist leer.</source>

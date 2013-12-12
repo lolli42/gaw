@@ -22,16 +22,6 @@ use TYPO3\Flow\Annotations as Flow;
 class PlanetCalculationService {
 
 	/**
-	const STRUCTURE_NONE = '';
-	const STRUCTURE_BASE = 'base';
-	const STRUCTURE_IRON = 'ironMine';
-	const STRUCTURE_SILICON = 'siliconMine';
-	const STRUCTURE_XENON = 'xenonMine';
-	const STRUCTURE_HYDRAZINE = 'hydrazineMine';
-	const STRUCTURE_ENERGY = 'energyMine';
-	 */
-
-	/**
 	 * Technology tree for structures
 	 *
 	 * @var array
@@ -90,13 +80,44 @@ class PlanetCalculationService {
 	);
 
 	/**
-	 * Get structure techtree
+	 * Formulas for resource calculations of structure building level requirements
 	 *
-	 * @return array
+	 * @var array
 	 */
-	public function getStructureTechTree() {
-		return $this->structureTechTree;
-	}
+	protected $structureResourceRequirements = array(
+		'base' => array(
+			'iron' => '(51 * pow($x, 2) - 102 * $x + 102) * 1000000',
+			'silicon' => '(31 * pow($x, 2) - 62 * $x + 62) * 1000000',
+			'xenon' => '(25 * pow($x, 2) - 50 * $x + 50) * 1000000',
+		),
+		'ironMine' => array(
+			'iron' => '(25 * pow($x, 2) - 50 * $x + 50) * 1000000',
+			'silicon' => '(32 * pow($x, 2) - 64 * $x + 64) * 1000000',
+			'energy' => '(7 * pow($x, 2) - 14 * $x + 14) * 1000000',
+		),
+		'siliconMine' => array(
+			'iron' => '(33 * pow($x, 2) - 66 * $x + 66) * 1000000',
+			'silicon' => '(24 * pow($x, 2) - 48 * $x + 48) * 1000000',
+			'energy' => '(6 * pow($x, 2) - 12 * $x + 12) * 1000000',
+		),
+		'xenonMine' => array(
+			'iron' => '(3 * pow($x, 2) - 6 * $x + 6) * 1000000',
+			'silicon' => '(40 * pow($x, 2) - 80 * $x + 80) * 1000000',
+			'energy' => '(23 * pow($x, 2) - 46 * $x + 46) * 1000000',
+		),
+		'hydrazineMine' => array(
+			'iron' => '(12 * pow($x, 2) - 24 * $x + 24) * 1000000',
+			'silicon' => '(42 * pow($x, 2) - 84 * $x + 84) * 1000000',
+			'xenon' => '(22 * pow($x, 2) - 44 * $x + 44) * 1000000',
+			'energy' => '(23 * pow($x, 2) - 46 * $x + 46) * 1000000',
+		),
+		'energyMine' => array(
+			'iron' => '(61 * pow($x, 2) - 122 * $x + 122) * 1000000',
+			'silicon' => '(53 * pow($x, 2) - 106 * $x + 106) * 1000000',
+			'xenon' => '(46 * pow($x, 2) - 92 * $x + 92) * 1000000',
+			'hydrazine' => '(34 * pow($x, 2) - 68 * $x + 68) * 1000000',
+		),
+	);
 
 	/**
 	 * Get points by structure table
@@ -124,6 +145,15 @@ class PlanetCalculationService {
 	}
 
 	/**
+	 * Get structure techtree
+	 *
+	 * @return array
+	 */
+	public function getStructureTechTree() {
+		return $this->structureTechTree;
+	}
+
+	/**
 	 * Whether a structure can be build on planet according to tech tree
 	 *
 	 * @param Planet $planet Planet to check
@@ -133,7 +163,7 @@ class PlanetCalculationService {
 	 */
 	public function isStructureAvailable(Planet $planet, $structure) {
 		if (!isset($this->structureTechTree[$structure])) {
-			throw new \Lolli\Gaw\Service\Exception(
+			throw new Exception(
 				'Structure not in techtree', 1386595094
 			);
 		}
@@ -146,6 +176,25 @@ class PlanetCalculationService {
 			}
 		}
 		return $result;
+	}
+
+	/**
+	 * Number of a specific structure currently in build queue.
+	 *
+	 * @param Planet $planet Given planet
+	 * @param string $structureName Name of structure
+	 * @return integer Count
+	 */
+	public function countSpecificStructuresInBuildQueue(Planet $planet, $structureName) {
+		$inQueue = 0;
+		$queuedStructures = $planet->getStructureBuildQueue();
+		foreach ($queuedStructures as $queuedStructure) {
+			/** @var $queuedStructure \Lolli\Gaw\Domain\Model\PlanetStructureBuildQueueItem */
+			if ($queuedStructure->getName() === $structureName) {
+				$inQueue = $inQueue + 1;
+			}
+		}
+		return $inQueue;
 	}
 
 	/**
@@ -181,6 +230,90 @@ class PlanetCalculationService {
 			$readyTime = $time + $buildTime;
 		}
 		return $readyTime;
+	}
+
+	/**
+	 * Calculate the resources needed for a specific building level.
+	 *
+	 * @param string $structureName The structure to calculate, eg. 'base' or 'ironMine'
+	 * @param integer $level Level of building
+	 * @throws Exception
+	 * @return array Resource cost: Key is the resource, value the number of micro units
+	 */
+	public function getResourcesRequiredForStructureLevel($structureName, $level) {
+		if (!isset($this->structureResourceRequirements[$structureName])) {
+			throw new Exception(
+				'Structure does not exist', 1386872360
+			);
+		}
+		$resourceArray = array();
+		foreach ($this->structureResourceRequirements[$structureName] as $resourceName => $formula) {
+			$amount = $this->getResourceRequiredForStructureLevel($structureName, $level, $resourceName);
+			$resourceArray[$resourceName] = $amount;
+		}
+		return $resourceArray;
+	}
+
+	/**
+	 * Calculate amount of micro units required to build a structure level by evaluating
+	 * the math functions defined in  $this->structureResourceRequirements
+	 *
+	 * @param integer $structureName Name of structure
+	 * @param integer $x Level of structure
+	 * @param string $resourceName Name of resource, eg. 'iron'
+	 * @return integer Number of micro units
+	 * @throws Exception
+	 */
+	public function getResourceRequiredForStructureLevel($structureName, $x, $resourceName) {
+		if (!is_integer($x) || $x < 0) {
+			throw new Exception(
+				'Structure level is out of bounds or smaller than zero', 1386872139
+			);
+		}
+		if (!isset($this->structureResourceRequirements[$structureName])) {
+			throw new Exception(
+				'Structure does not exist', 1386872359
+			);
+		}
+		$units = 0;
+		if (isset($this->structureResourceRequirements[$structureName][$resourceName])) {
+			$formula = $this->structureResourceRequirements[$structureName][$resourceName];
+			eval('$units = ' . $formula . ';');
+			$units = (int)round($units);
+		}
+		return $units;
+	}
+
+	/**
+	 * Find out if given resources are available on planet
+	 *
+	 * @param Planet $planet Planet to handle
+	 * @param array $resources Resources to check for, eg. iron=20, silicon=40
+	 * @return TRUE if all Resources are available on planet
+	 */
+	public function isResourcesAvailable(Planet $planet, array $resources) {
+		$result = TRUE;
+		foreach ($resources as $resourceName => $amount) {
+			$result = $result & $this->isResourceAvailable($planet, $resourceName, $amount);
+		}
+		return $result;
+	}
+
+	/**
+	 * TRUE if at least this amount of resources is available on planet
+	 *
+	 * @param Planet $planet Given planet
+	 * @param string $resourceName Name of resource, eg. 'iron'
+	 * @param string $amount Amount in micro units to check for
+	 * @return boolean TRUE if this amount of resource is available
+	 */
+	public function isResourceAvailable(Planet $planet, $resourceName, $amount) {
+		$result = TRUE;
+		$propertyName = 'get' . ucfirst($resourceName);
+		if ($planet->$propertyName() - $amount < 0) {
+			$result = FALSE;
+		}
+		return $result;
 	}
 
 	/**

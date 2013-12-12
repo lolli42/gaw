@@ -139,15 +139,14 @@ class WorkerCommandController extends \TYPO3\Flow\Cli\CommandController {
 	 * Triggered by "client"
 	 *
 	 * @param array $data Data to work on
-	 * @throws Exception\CatchableWorkerException
+	 * @throws Exception\CatchableWorkerException Logic errors that may happen
+	 * @throws Exception\WorkerException Logic errors that are programming errors
 	 * @return array Result
 	 */
 	protected function addPlanetStructureToBuildQueue(array $data) {
-		// @TODO: Check if building is available according to tech tree
-		// @TODO: Handle structure in progress correctly
 		$planet = $this->planetRepository->findOneByPosition($data['galaxyNumber'], $data['systemNumber'], $data['planetNumber']);
 
-		// Do not queue if already maximum number of structures are in build queue
+		// Do not queue if already maximum number of structures are in build queue, may happen -> catchable!
 		if ($planet->getStructureBuildQueue()->count() >= $this->settings['Game']['Planet']['maximumStructureQueueLength']) {
 			throw new Exception\CatchableWorkerException(
 				'Can not queue structure building, maximum queue length reached', 1386788435
@@ -155,6 +154,28 @@ class WorkerCommandController extends \TYPO3\Flow\Cli\CommandController {
 		}
 
 		$structureName = $data['structureName'];
+
+		// Do not queue if building is not available due to tech tree: Should technically not happen -> not catchable!
+		if (!$this->planetCalculationService->isStructureAvailable($planet, $structureName)) {
+			throw new Exception\WorkerException(
+				'Can not queue structure building, tech tree not fulfilled', 1386886693
+			);
+		}
+
+		// Next level to build
+		$method = 'get' . ucfirst($structureName);
+		$currentLevel = $planet->$method();
+		$inQueue = $this->planetCalculationService->countSpecificStructuresInBuildQueue($planet, $structureName);
+		$nextLevel = $currentLevel + $inQueue + 1;
+
+		// Do not queue if resources are not available: May eg. happen if something else was build in other tab -> catchable!
+		$requiredResources = $this->planetCalculationService->getResourcesRequiredForStructureLevel($structureName, $nextLevel);
+		if (!$this->planetCalculationService->isResourcesAvailable($planet, $requiredResources)) {
+			throw new Exception\CatchableWorkerException(
+				'Can not queue structure building, not enough resources', 1386887424
+			);
+		}
+
 		$readyTime = $this->planetCalculationService->getReadyTimeOfStructure($planet, $structureName, $data['time']);
 
 		// Add increment job
@@ -175,6 +196,15 @@ class WorkerCommandController extends \TYPO3\Flow\Cli\CommandController {
 		$structureBuildQueueItem->setName($structureName);
 		$structureBuildQueueItem->setReadyTime($readyTime);
 		$planet->addStructureToStructureBuildQueue($structureBuildQueueItem);
+
+		// Decrement planet resources
+		foreach ($requiredResources as $resourceName => $units) {
+			$getter = 'get' . ucfirst($resourceName);
+			$setter = 'set' . ucfirst($resourceName);
+			$currentUnits = $planet->$getter();
+			$planet->$setter($currentUnits - $units);
+		}
+
 		$this->planetRepository->update($planet);
 		$this->persistenceManager->persistAll();
 		// @TODO: Detach the queue item here, too? If so: Refactor detach to own class separated from repo?
@@ -194,7 +224,6 @@ class WorkerCommandController extends \TYPO3\Flow\Cli\CommandController {
 	 * @return array Result
 	 */
 	protected function removeLastStructureFromBuildQueue(array $data) {
-		// @TODO: Give back resources
 		$planet = $this->planetRepository->findOneByPosition($data['galaxyNumber'], $data['systemNumber'], $data['planetNumber']);
 
 		// Stop if queue is empty
@@ -207,13 +236,14 @@ class WorkerCommandController extends \TYPO3\Flow\Cli\CommandController {
 
 		/** @var \Lolli\Gaw\Domain\Model\PlanetStructureBuildQueueItem $lastQueueItem */
 		$lastQueueItem = $planetStructureQueue->last();
+		$structureName = $lastQueueItem->getName();
 
 		// Cancel 'increment' job
 		// [!!!] This data and order (!) has to be the same as data in addPlanetStructureToBuildQueue()
 		// @TODO: Remove duplicate array definitions (all over the place, also in "client" controllers)
 		$data = array(
 			'command' => 'incrementPlanetStructure',
-			'structureName' => $lastQueueItem->getName(),
+			'structureName' => $structureName,
 			'tags' => array($planet->getPlanetPositionString()),
 			'time' => $lastQueueItem->getReadyTime(),
 			'galaxyNumber' => $planet->getGalaxyNumber(),
@@ -223,8 +253,21 @@ class WorkerCommandController extends \TYPO3\Flow\Cli\CommandController {
 		// Method will throw an exception if job was not found, we can safely continue here if it doesn't
 		$this->redisFacade->removeOneScheduledJob($data);
 
+		// Increment planet resources
+		$inQueue = $this->planetCalculationService->countSpecificStructuresInBuildQueue($planet, $structureName);
+		$method = 'get' . ucfirst($structureName);
+		$levelToAbort = $planet->$method() + $inQueue;
+		$resourcesForLevel = $this->planetCalculationService->getResourcesRequiredForStructureLevel($structureName, $levelToAbort);
+		foreach ($resourcesForLevel as $resourceName => $units) {
+			$getter = 'get' . ucfirst($resourceName);
+			$setter = 'set' . ucfirst($resourceName);
+			$currentUnits = $planet->$getter();
+			$planet->$setter($currentUnits + $units);
+		}
+
 		// Remove queue item
 		$planetStructureQueue->removeElement($lastQueueItem);
+
 		$this->planetRepository->update($planet);
 		$this->persistenceManager->persistAll();
 		// @TODO: Detach the queue item here, too? If so: Refactor detach to own class separated from repo?

@@ -81,20 +81,45 @@
 			as="structureName"
 		>
 			<f:if condition="{selectedPlanet -> gaw:planet.isStructureAvailable(structureName: structureName)}">
-				<tr>
-					<td>
-						<f:translate id="planet.{structureName}" />
-						<span class="entity-available">[{selectedPlanet -> gaw:property(propertyName: structureName)}]</span>
-					</td>
-					<td>
-						<f:if condition="{currentStructureBuildQueueLength} < {settings.Game.Planet.maximumStructureQueueLength}">
-							<f:form action="addStructureToBuildQueue" object="{selectedPlanet}" objectName="planet">
-								<f:form.hidden value="{structureName}" name="structureName" />
-								<f:form.submit value="Ausbauen" />
-							</f:form>
-						</f:if>
-					</td>
-				</tr>
+				<f:alias
+					map="{
+						currentLevel: '{selectedPlanet -> gaw:property(propertyName: structureName)}'
+						nextLevel: '{selectedPlanet -> gaw:planet.nextNotQueuedStructureLevel(structureName: structureName)}'
+					}"
+				>
+					<tr>
+						<td>
+							<f:translate id="planet.{structureName}" />
+							<span class="entity-available">[{currentLevel}]</span>
+							<br />
+							<f:for
+								each="{gaw:planet.requiredResourcesForStructureLevel(structureName: structureName, level: nextLevel)}"
+								as="microunit"
+								key="resourceName"
+							>
+								<f:translate id="resource.short.{resourceName}" />:
+								<f:if condition="{microunit} < {gaw:property(propertyName: resourceName, object: selectedPlanet)}">
+									<f:then>
+										<span class="entity-available">{microunit -> gaw:format.unit()}</span>
+									</f:then>
+									<f:else>
+										<span class="entity-not-available">{microunit -> gaw:format.unit()}</span>
+									</f:else>
+								</f:if>
+							</f:for>
+						</td>
+						<td>
+							<f:if condition="{currentStructureBuildQueueLength} < {settings.Game.Planet.maximumStructureQueueLength}">
+								<f:if condition="{gaw:planet.isResourcesAvailableForStructureLevel(planet: selectedPlanet, structureName: structureName, level: nextLevel)}">
+									<f:form action="addStructureToBuildQueue" object="{selectedPlanet}" objectName="planet">
+										<f:form.hidden value="{structureName}" name="structureName" />
+										<f:form.submit value="Ausbau auf {nextLevel}" />
+									</f:form>
+								</f:if>
+							</f:if>
+						</td>
+					</tr>
+				</f:alias>
 			</f:if>
 		</f:for>
 	</table>
@@ -169,7 +194,7 @@
 					Summe
 				</td>
 				<td>
-					{selectedPlanet.points}
+					<span class="entity-available">{selectedPlanet.points}</span>
 				</td>
 			</tr>
 		</tbody>

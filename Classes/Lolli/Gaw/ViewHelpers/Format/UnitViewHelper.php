@@ -49,7 +49,7 @@ class UnitViewHelper extends AbstractViewHelper {
 			$value = $this->renderChildren();
 		}
 		if (!is_integer($value)) {
-			throw new Exception('Unit is not an integer as expected', 1386531079);
+			$value = (int)$value;
 		}
 
 		// micro units -> units

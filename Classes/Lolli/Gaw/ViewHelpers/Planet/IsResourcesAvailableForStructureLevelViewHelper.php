@@ -16,10 +16,9 @@ use TYPO3\Flow\Annotations as Flow;
 use Lolli\Gaw\Domain\Model\Planet;
 
 /**
- * Whether a structure can be build according to tech tree.
- * Usually used within f:if
+ * True if enough resources are available on planet for a specific structure level
  */
-class IsStructureAvailableViewHelper extends AbstractViewHelper {
+class IsResourcesAvailableForStructureLevelViewHelper extends AbstractViewHelper {
 
 	/**
 	 * @Flow\Inject
@@ -28,20 +27,22 @@ class IsStructureAvailableViewHelper extends AbstractViewHelper {
 	protected $planetCalculationService;
 
 	/**
-	 * TRUE if given structure can be build according to tech tree
+	 * TRUE if enough resources are available
 	 *
 	 * @param integer $structureName The structure to build
+	 * @param integer $level The level to build
 	 * @param Planet $planet The planet to check
 	 * @throws Exception
-	 * @return boolean TRUE if structure is available
+	 * @return boolean TRUE if all resources are available
 	 */
-	public function render($structureName, $planet = NULL) {
+	public function render($structureName, $level, $planet = NULL) {
 		if ($planet === NULL) {
 			$planet = $this->renderChildren();
 		}
 		if (!($planet instanceof Planet)) {
-			throw new Exception('Not a planet given', 1386596030);
+			throw new Exception('Not a planet given', 1386882737);
 		}
-		return $this->planetCalculationService->isStructureAvailable($planet, $structureName);
+		$requiredResources = $this->planetCalculationService->getResourcesRequiredForStructureLevel($structureName, $level);
+		return $this->planetCalculationService->isResourcesAvailable($planet, $requiredResources);
 	}
 }
