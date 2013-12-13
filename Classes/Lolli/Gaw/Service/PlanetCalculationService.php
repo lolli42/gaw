@@ -72,7 +72,7 @@ class PlanetCalculationService {
 	 * @var array
 	 */
 	protected $basicProduction = array(
-		'iron' => 0.05, // microunits per mircosecond -> 60 * 60 -> 180 units / h
+		'iron' => 0.05, // micro units per micro second -> 60 * 60 -> 180 units / h
 		'silicon' => 0.05,
 		'xenon' => 0.05,
 		'hydrazine' => 0.05,
@@ -256,7 +256,7 @@ class PlanetCalculationService {
 
 	/**
 	 * Calculate amount of micro units required to build a structure level by evaluating
-	 * the math functions defined in  $this->structureResourceRequirements
+	 * the math functions defined in $this->structureResourceRequirements
 	 *
 	 * @param integer $structureName Name of structure
 	 * @param integer $x Level of structure
@@ -317,23 +317,23 @@ class PlanetCalculationService {
 	}
 
 	/**
-	 * Calculate resources on planet at given time
+	 * Calculate resources produced by planet until given time
 	 *
 	 * @param Planet $planet Planet to work on
 	 * @param integer $time Absolute game time in microseconds
 	 * @throws Exception If time is in the past in comparison to last resource update time
 	 * @return array Resources
 	 */
-	public function resourcesAtTime(Planet $planet, $time) {
+	public function resourcesProducedUntil(Planet $planet, $time) {
 		if ($time < $planet->getLastResourceUpdate()) {
 			throw new Exception('Given time must not be lower than last resource update time', 1386523956);
 		}
 		$elapsedTime = $time - $planet->getLastResourceUpdate();
-		$iron = $planet->getIron() + (int)($elapsedTime * $this->basicProduction['iron']);
-		$silicon = $planet->getSilicon() + (int)($elapsedTime * $this->basicProduction['silicon']);
-		$xenon = $planet->getXenon() + (int)($elapsedTime * $this->basicProduction['xenon']);
-		$hydrazine = $planet->getHydrazine() + (int)($elapsedTime * $this->basicProduction['hydrazine']);
-		$energy = $planet->getEnergy() + (int)($elapsedTime * $this->basicProduction['energy']);
+		$iron = (int)($elapsedTime * $this->basicProduction['iron']);
+		$silicon = (int)($elapsedTime * $this->basicProduction['silicon']);
+		$xenon = (int)($elapsedTime * $this->basicProduction['xenon']);
+		$hydrazine = (int)($elapsedTime * $this->basicProduction['hydrazine']);
+		$energy = (int)($elapsedTime * $this->basicProduction['energy']);
 		return array(
 			'iron' => $iron,
 			'silicon' => $silicon,

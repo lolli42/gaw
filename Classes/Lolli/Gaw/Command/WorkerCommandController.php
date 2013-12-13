@@ -83,15 +83,17 @@ class WorkerCommandController extends \TYPO3\Flow\Cli\CommandController {
 		}
 	}
 
+	/**
+	 * Update resources produced meanwhile
+	 *
+	 * @param array $data Data to work on
+	 * @return array
+	 */
 	protected function updateResourcesOnPlanet(array $data) {
 		$planet = $this->planetRepository->findOneByPosition($data['galaxyNumber'], $data['systemNumber'], $data['planetNumber']);
 		$time = $this->redisFacade->getGameTimeNow();
-		$newResources = $this->planetCalculationService->resourcesAtTime($planet, $time);
-		$planet->setIron($newResources['iron']);
-		$planet->setSilicon($newResources['silicon']);
-		$planet->setXenon($newResources['xenon']);
-		$planet->setHydrazine($newResources['hydrazine']);
-		$planet->setEnergy($newResources['energy']);
+		$newResources = $this->planetCalculationService->resourcesProducedUntil($planet, $time);
+		$this->addResourcesToPlanet($planet, $newResources);
 		$planet->setLastResourceUpdate($time);
 		$this->planetRepository->update($planet);
 		$this->persistenceManager->persistAll();
@@ -198,12 +200,7 @@ class WorkerCommandController extends \TYPO3\Flow\Cli\CommandController {
 		$planet->addStructureToStructureBuildQueue($structureBuildQueueItem);
 
 		// Decrement planet resources
-		foreach ($requiredResources as $resourceName => $units) {
-			$getter = 'get' . ucfirst($resourceName);
-			$setter = 'set' . ucfirst($resourceName);
-			$currentUnits = $planet->$getter();
-			$planet->$setter($currentUnits - $units);
-		}
+		$this->removeResourcesFromPlanet($planet, $requiredResources);
 
 		$this->planetRepository->update($planet);
 		$this->persistenceManager->persistAll();
@@ -258,12 +255,7 @@ class WorkerCommandController extends \TYPO3\Flow\Cli\CommandController {
 		$method = 'get' . ucfirst($structureName);
 		$levelToAbort = $planet->$method() + $inQueue;
 		$resourcesForLevel = $this->planetCalculationService->getResourcesRequiredForStructureLevel($structureName, $levelToAbort);
-		foreach ($resourcesForLevel as $resourceName => $units) {
-			$getter = 'get' . ucfirst($resourceName);
-			$setter = 'set' . ucfirst($resourceName);
-			$currentUnits = $planet->$getter();
-			$planet->$setter($currentUnits + $units);
-		}
+		$this->addResourcesToPlanet($planet, $resourcesForLevel);
 
 		// Remove queue item
 		$planetStructureQueue->removeElement($lastQueueItem);
@@ -282,7 +274,6 @@ class WorkerCommandController extends \TYPO3\Flow\Cli\CommandController {
 	 * @throws Exception
 	 */
 	protected function incrementPlanetStructure(array $data) {
-		// @TODO: updateRessOnPlaniAtTime($data['time']);
 		$structureName = $data['structureName'];
 		$planet = $this->planetRepository->findOneByPosition($data['galaxyNumber'], $data['systemNumber'], $data['planetNumber']);
 		$currentBuildQueue = $planet->getStructureBuildQueue();
@@ -303,6 +294,9 @@ class WorkerCommandController extends \TYPO3\Flow\Cli\CommandController {
 				'Top most queue item ready time does not correspond with expected ready time', 1386609761
 			);
 		}
+		$newResources = $this->planetCalculationService->resourcesProducedUntil($planet, $data['time']);
+		$this->addResourcesToPlanet($planet, $newResources);
+		$planet->setLastResourceUpdate($data['time']);
 		$incrementMethodName = 'increment' . ucfirst($structureName);
 		$planet->$incrementMethodName();
 		$planet->setPoints($this->planetCalculationService->calculateTotalPoints($planet));
@@ -310,5 +304,35 @@ class WorkerCommandController extends \TYPO3\Flow\Cli\CommandController {
 		$this->planetRepository->update($planet);
 		$this->persistenceManager->persistAll();
 		$this->planetRepository->detach($planet);
+	}
+
+	/**
+	 * Add given resources to planet
+	 *
+	 * @param \Lolli\Gaw\Domain\Model\Planet $planet
+	 * @param array $resources The resources to add
+	 */
+	protected function addResourcesToPlanet(\Lolli\Gaw\Domain\Model\Planet $planet, array $resources) {
+		foreach ($resources as $resourceName => $units) {
+			$getter = 'get' . ucfirst($resourceName);
+			$setter = 'set' . ucfirst($resourceName);
+			$currentUnits = $planet->$getter();
+			$planet->$setter($currentUnits + $units);
+		}
+	}
+
+	/**
+	 * Remove given resources from planet
+	 *
+	 * @param \Lolli\Gaw\Domain\Model\Planet $planet
+	 * @param array $resources The resources to remove
+	 */
+	protected function removeResourcesFromPlanet(\Lolli\Gaw\Domain\Model\Planet $planet, array $resources) {
+		foreach ($resources as $resourceName => $units) {
+			$getter = 'get' . ucfirst($resourceName);
+			$setter = 'set' . ucfirst($resourceName);
+			$currentUnits = $planet->$getter();
+			$planet->$setter($currentUnits - $units);
+		}
 	}
 }

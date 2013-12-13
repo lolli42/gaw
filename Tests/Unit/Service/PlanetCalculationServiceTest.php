@@ -35,7 +35,7 @@ class PlanetCalculationServiceTest extends \TYPO3\Flow\Tests\UnitTestCase {
 	public function resourcesAtTimeThrowsExceptionIfTimeIsLowerThanLastResourceUpdateTime() {
 		$planet = new \Lolli\Gaw\Domain\Model\Planet();
 		$planet->setLastResourceUpdate(100);
-		$this->subject->resourcesAtTime($planet, 50);
+		$this->subject->resourcesProducedUntil($planet, 50);
 	}
 
 	/**
@@ -48,21 +48,7 @@ class PlanetCalculationServiceTest extends \TYPO3\Flow\Tests\UnitTestCase {
 		$planet->setIronMine(0);
 		$oneHour = 60 * 60 * 1000000; // An hour in microseconds
 		$expectedIron = 180000000; // micro units, 180 units
-		$result = $this->subject->resourcesAtTime($planet, $oneHour);
-		$this->assertEquals($expectedIron, $result['iron']);
-	}
-
-	/**
-	 * @test
-	 */
-	public function resourcesAtTimeCalculatesIronCorrectlyWithExistingIron() {
-		$planet = new \Lolli\Gaw\Domain\Model\Planet();
-		$planet->setIron(123000000);
-		$planet->setLastResourceUpdate(0);
-		$planet->setIronMine(0);
-		$oneHour = 60 * 60 * 1000000; // An hour in microseconds
-		$expectedIron = 303000000;
-		$result = $this->subject->resourcesAtTime($planet, $oneHour);
+		$result = $this->subject->resourcesProducedUntil($planet, $oneHour);
 		$this->assertEquals($expectedIron, $result['iron']);
 	}
 
