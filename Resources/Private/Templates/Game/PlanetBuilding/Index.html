@@ -89,7 +89,9 @@
 				>
 					<tr>
 						<td>
-							<f:translate id="planet.{structureName}" />
+							<f:link.action action="productionMatrix" arguments="{structureName: structureName}">
+								<f:translate id="planet.{structureName}" />
+							</f:link.action>
 							<span class="entity-available">[{currentLevel}]</span>
 							<br />
 							<f:for
@@ -282,99 +284,4 @@
 			</tr>
 		</tbody>
 	</table>
-
-	<f:for
-		each="{
-			0: 'ironMine',
-			1: 'siliconMine',
-			2: 'xenonMine',
-			3: 'hydrazineMine',
-			4: 'energyMine'
-		}"
-		as="mineName"
-	>
-		<table>
-			<thead>
-				<tr>
-					<td><f:translate id="planet.{mineName}" /></td>
-					<td>Produktion</td>
-					<td><f:translate id="resource.iron" /></td>
-					<td><f:translate id="resource.silicon" /></td>
-					<td><f:translate id="resource.xenon" /></td>
-					<td><f:translate id="resource.hydrazine" /></td>
-					<td><f:translate id="resource.energy" /></td>
-					<td>Basis 1</td>
-					<td>Basis 2</td>
-					<td>Basis 4</td>
-					<td>Basis 8</td>
-					<td>Basis 16</td>
-					<td>Basis 32</td>
-					<td>Basis 64</td>
-				</tr>
-			</thead>
-			<tbody>
-				<gaw:iterator.for from="1" to="60" as="level">
-					<tr>
-						<td>
-							{level}
-						</td>
-						<td>
-							<gaw:format.unit>
-								<gaw:planet.resourceMineProductionByResourceLevelTime
-									resource="{gaw:planet.mineToResource(mineName: mineName)}"
-									level="{level}"
-									time="3600000000"
-								/>
-							</gaw:format.unit>
-						</td>
-
-						<f:for
-							each="{
-								0: 'iron',
-								1: 'silicon',
-								2: 'xenon',
-								3: 'hydrazine',
-								4: 'energy'
-							}"
-							as="resource"
-						>
-							<td>
-								<gaw:format.unit>
-									<gaw:planet.requiredResourceForStructureLevel
-										structureName="{mineName}"
-										level="{level}"
-										resourceName="{resource}"
-									/>
-								</gaw:format.unit>
-							</td>
-						</f:for>
-
-						<f:for
-							each="{
-								0: '1',
-								1: '2',
-								2: '4',
-								3: '8',
-								4: '16',
-								5: '32',
-								6: '64'
-							}"
-							as="baseLevel"
-						>
-							<td>
-								<gaw:format.time>
-									<gaw:planet.buildTimeOfStructureByBaseLevel
-										structureName="{mineName}"
-										level="{level}"
-										baseLevel="{baseLevel}"
-									/>
-								</gaw:format.time>
-							</td>
-						</f:for>
-					</tr>
-				</gaw:iterator.for>
-			</tbody>
-		</table>
-	</f:for>
-
 </f:section>

@@ -113,4 +113,21 @@ class PlanetBuildingController extends AbstractGameController {
 		$this->planetRepository->refresh($planet);
 		$this->forward('index');
 	}
+
+	/**
+	 * Render production matrix for specific structure
+	 *
+	 * @param string $structureName Structure name
+	 * @throws Exception
+	 */
+	public function productionMatrixAction($structureName) {
+		$structureGetter = 'get' . ucfirst($structureName);
+		$planet = new Planet();
+		if (!method_exists($planet, $structureGetter)) {
+			throw new Exception(
+				'Structure does not exist', 1387144812
+			);
+		}
+		$this->view->assign('structureName', $structureName);
+	}
 }

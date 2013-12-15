@@ -1,0 +1,120 @@
+{namespace gaw=Lolli\Gaw\ViewHelpers}
+
+<f:layout name="Game" />
+
+<f:section name="Title">
+	Produktionsmatrix <f:translate id="planet.{structureName}" />
+</f:section>
+
+<f:section name="Content">
+	<table>
+		<thead>
+			<tr>
+				<td></td>
+				<f:if condition="{structureName} != 'base'">
+					<td>Prod</td>
+				</f:if>
+				<td><f:translate id="resource.short.iron" /></td>
+				<td><f:translate id="resource.short.silicon" /></td>
+				<td><f:translate id="resource.short.xenon" /></td>
+				<td><f:translate id="resource.short.hydrazine" /></td>
+				<td><f:translate id="resource.short.energy" /></td>
+
+				<f:if condition="{structureName} != 'base'">
+					<f:then>
+						<td>Basis 1</td>
+						<td>Basis 2</td>
+						<td>Basis 4</td>
+						<td>Basis 8</td>
+						<td>Basis 16</td>
+						<td>Basis 32</td>
+						<td>Basis 64</td>
+					</f:then>
+					<f:else>
+						<td>Bauzeit</td>
+					</f:else>
+				</f:if>
+			</tr>
+		</thead>
+		<tbody>
+			<gaw:iterator.for from="1" to="60" as="level">
+				<tr>
+					<td>
+						{level}
+					</td>
+					<f:if condition="{structureName} != 'base'">
+						<td>
+							<gaw:format.unit>
+								<gaw:planet.resourceMineProductionByResourceLevelTime
+									resource="{gaw:planet.mineToResource(mineName: structureName)}"
+									level="{level}"
+									time="3600000000"
+								/>
+							</gaw:format.unit>
+						</td>
+					</f:if>
+
+					<f:for
+						each="{
+							0: 'iron',
+							1: 'silicon',
+							2: 'xenon',
+							3: 'hydrazine',
+							4: 'energy'
+						}"
+						as="resource"
+					>
+						<td>
+							<gaw:format.unit>
+								<gaw:planet.requiredResourceForStructureLevel
+									structureName="{structureName}"
+									level="{level}"
+									resourceName="{resource}"
+								/>
+							</gaw:format.unit>
+						</td>
+					</f:for>
+
+					<f:if condition="{structureName} != 'base'">
+						<f:then>
+							<f:for
+								each="{
+									0: '1',
+									1: '2',
+									2: '4',
+									3: '8',
+									4: '16',
+									5: '32',
+									6: '64'
+								}"
+								as="baseLevel"
+							>
+								<td>
+									<gaw:format.time>
+										<gaw:planet.buildTimeOfStructureByBaseLevel
+											structureName="{structureName}"
+											level="{level}"
+											baseLevel="{baseLevel}"
+										/>
+									</gaw:format.time>
+								</td>
+							</f:for>
+						</f:then>
+						<f:else>
+							<td>
+								<gaw:format.time>
+									<gaw:planet.buildTimeOfStructureByBaseLevel
+										structureName="{structureName}"
+										level="{level}"
+										baseLevel="1"
+										/>
+								</gaw:format.time>
+							</td>
+						</f:else>
+					</f:if>
+				</tr>
+			</gaw:iterator.for>
+		</tbody>
+	</table>
+
+</f:section>

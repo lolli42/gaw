@@ -10,7 +10,7 @@ resources:
     Lolli_Gaw_Logout: 'method(Lolli\Gaw\Controller\AuthenticationController->logoutAction()) || method(TYPO3\Flow\Security\Authentication\Controller\AbstractAuthenticationController->logoutAction())'
 
     Lolli_Gaw_Game_Galaxy: 'method(public Lolli\Gaw\Controller\Game\GalaxyController->.*Action())'
-    Lolli_Gaw_Game_PlanetBuilding: 'method(public Lolli\Gaw\Controller\Game\PlanetBuildingController->indexAction()) || method(public Lolli\Gaw\Controller\Game\PlanetBuildingController->(addStructureToBuildQueue|removeLastStructureFromBuildQueue)Action(planet.player == current.securityContext.party))'
+    Lolli_Gaw_Game_PlanetBuilding: 'method(public Lolli\Gaw\Controller\Game\PlanetBuildingController->(index|productionMatrix)Action()) || method(public Lolli\Gaw\Controller\Game\PlanetBuildingController->(addStructureToBuildQueue|removeLastStructureFromBuildQueue)Action(planet.player == current.securityContext.party))'
     Lolli_Gaw_Game_PlanetSelection: 'method(public Lolli\Gaw\Controller\Game\PlayerController->selectPlanetAction(player.selectedPlanet.player == current.securityContext.party))'
 
 acls:
