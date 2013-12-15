@@ -338,29 +338,52 @@ class PlanetCalculationService {
 		}
 		$elapsedTime = $time - $planet->getLastResourceUpdate();
 
-		$ironByMine = $this->resourceProductionByTimeAndMineLevel('iron', $elapsedTime, $planet->getIronMine());
-		$iron = (int)($elapsedTime * $this->basicProduction['iron'] + $ironByMine);
-
-		$siliconByMine = $this->resourceProductionByTimeAndMineLevel('silicon', $elapsedTime, $planet->getSiliconMine());
-		$silicon = (int)($elapsedTime * $this->basicProduction['silicon'] + $siliconByMine);
-
-		$xenonByMine = $this->resourceProductionByTimeAndMineLevel('xenon', $elapsedTime, $planet->getXenonMine());
-		$xenon = (int)($elapsedTime * $this->basicProduction['xenon'] + $xenonByMine);
-
-		$hydrazineByMine = $this->resourceProductionByTimeAndMineLevel('hydrazine', $elapsedTime, $planet->getHydrazineMine());
-		$hydrazine = (int)($elapsedTime * $this->basicProduction['hydrazine'] + $hydrazineByMine);
-
 		// @TODO: Combine energy and hydrazine
-		$energyByMine = $this->resourceProductionByTimeAndMineLevel('hydrazine', $elapsedTime, $planet->getEnergyMine());
-		$energy = (int)($elapsedTime * $this->basicProduction['energy'] + $energyByMine);
 
 		return array(
-			'iron' => $iron,
-			'silicon' => $silicon,
-			'xenon' => $xenon,
-			'hydrazine' => $hydrazine,
-			'energy' => $energy,
+			'iron' => (int)($this->resourceFullProductionByTimeLevel('iron', $elapsedTime, $planet->getIronMine())),
+			'silicon' => (int)($this->resourceFullProductionByTimeLevel('silicon', $elapsedTime, $planet->getSiliconMine())),
+			'xenon' => (int)($this->resourceFullProductionByTimeLevel('xenon', $elapsedTime, $planet->getXenonMine())),
+			'hydrazine' => (int)($this->resourceFullProductionByTimeLevel('hydrazine', $elapsedTime, $planet->getHydrazineMine())),
+			'energy' => (int)($this->resourceFullProductionByTimeLevel('energy', $elapsedTime, $planet->getEnergyMine())),
 		);
+	}
+
+	/**
+	 * Calculate resource production of mine in given time frame and mine level
+	 *
+	 * @param string $resource Resource to calculate
+	 * @param integer $time Time frame in micro seconds
+	 * @param integer $level Mine level
+	 * @throws Exception
+	 * @return integer Production
+	 */
+	public function resourceFullProductionByTimeLevel($resource, $time, $level) {
+		$basicProduction = $this->resourceBasicProductionByTime($resource, $time);
+		$mineProduction = $this->resourceMineProductionByTimeAndMineLevel($resource, $time, $level);
+		return (int)($basicProduction + $mineProduction);
+	}
+
+	/**
+	 * Calculate resource base production by time
+	 *
+	 * @param string $resource Resource name, eg. 'iron'
+	 * @param integer $time Time frame
+	 * @throws Exception
+	 * @return integer Production in micro units
+	 */
+	public function resourceBasicProductionByTime($resource, $time) {
+		if (!is_integer($time) || $time < 0) {
+			throw new Exception(
+				'Time is not a positive integer', 1387118126
+			);
+		}
+		if (!isset($this->basicProduction[$resource])) {
+			throw new Exception(
+				'Resource not found', 1387118154
+			);
+		}
+		return (int)($time * $this->basicProduction[$resource]);
 	}
 
 	/**
@@ -372,7 +395,7 @@ class PlanetCalculationService {
 	 * @throws Exception
 	 * @return integer Production
 	 */
-	public function resourceProductionByTimeAndMineLevel($resource, $time, $level) {
+	public function resourceMineProductionByTimeAndMineLevel($resource, $time, $level) {
 		if (!is_integer($time) || $time <= 0) {
 			throw new Exception(
 				'Time is not a positive integer', 1387110946

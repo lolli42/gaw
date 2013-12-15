@@ -199,4 +199,87 @@
 			</tr>
 		</tbody>
 	</table>
+
+	<table>
+		<thead>
+			<tr>
+				<td></td>
+				<td><f:translate id="resource.iron" /></td>
+				<td><f:translate id="resource.silicon" /></td>
+				<td><f:translate id="resource.xenon" /></td>
+				<td><f:translate id="resource.hydrazine" /></td>
+				<td><f:translate id="resource.energy" /></td>
+			</tr>
+		</thead>
+		<tbody>
+			<tr>
+				<td>Basisproduktion / Stunde</td>
+				<f:for
+					each="{
+						0: 'iron',
+						1: 'silicon',
+						2: 'xenon',
+						3: 'hydrazine',
+						4: 'energy'
+					}"
+					as="resource"
+				>
+					<td>
+						{gaw:planet.resourceBasicProductionByResourceTime(resource: resource, time: '3600000000') -> gaw:format.unit()}
+					</td>
+				</f:for>
+			</tr>
+			<tr>
+				<td>Mine / Stunde</td>
+				<f:for
+					each="{
+						0: 'iron',
+						1: 'silicon',
+						2: 'xenon',
+						3: 'hydrazine',
+						4: 'energy'
+					}"
+					as="resource"
+				>
+					<f:alias
+						map="{
+							mineLevel: '{selectedPlanet -> gaw:property(propertyName: \'{resource}Mine\')}'
+						}"
+					>
+						<td>
+							{gaw:planet.resourceMineProductionByResourceLevelTime(resource: resource, level: mineLevel, time: '3600000000') -> gaw:format.unit()}
+							<span class="entity-available">[{mineLevel}]</span>
+						</td>
+					</f:alias>
+				</f:for>
+			</tr>
+			<tr>
+				<td>Gesamt</td>
+				<f:for
+					each="{
+						0: 'iron',
+						1: 'silicon',
+						2: 'xenon',
+						3: 'hydrazine',
+						4: 'energy'
+					}"
+					as="resource"
+					>
+					<f:alias
+						map="{
+							mineLevel: '{selectedPlanet -> gaw:property(propertyName: \'{resource}Mine\')}'
+						}"
+						>
+						<td>
+							<span class="entity-available">
+								<gaw:format.unit>
+									{gaw:planet.resourceFullProductionByResourceLevelTime(resource: resource, level: mineLevel, time: '3600000000')}
+								</gaw:format.unit>
+							</span>
+						</td>
+					</f:alias>
+				</f:for>
+			</tr>
+		</tbody>
+	</table>
 </f:section>

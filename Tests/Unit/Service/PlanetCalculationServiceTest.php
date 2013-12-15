@@ -155,7 +155,7 @@ class PlanetCalculationServiceTest extends \TYPO3\Flow\Tests\UnitTestCase {
 		$microSeconds = 1;
 		$level = 0;
 		$expected = 0;
-		$result = $this->subject->resourceProductionByTimeAndMineLevel('iron', $microSeconds, $level);
+		$result = $this->subject->resourceMineProductionByTimeAndMineLevel('iron', $microSeconds, $level);
 		$this->assertSame($expected, $result);
 	}
 
@@ -166,7 +166,7 @@ class PlanetCalculationServiceTest extends \TYPO3\Flow\Tests\UnitTestCase {
 		$microSeconds = 1000000 * 60 * 60; // 1 hour
 		$level = 10;
 		$expected = 600000000; // 600 per hour
-		$result = $this->subject->resourceProductionByTimeAndMineLevel('iron', $microSeconds, $level);
+		$result = $this->subject->resourceMineProductionByTimeAndMineLevel('iron', $microSeconds, $level);
 		$this->assertSame($expected, $result);
 	}
 }
