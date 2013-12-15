@@ -1,5 +1,5 @@
 <?php
-namespace Lolli\Gaw\ViewHelpers\Math;
+namespace Lolli\Gaw\ViewHelpers\Iterator;
 
 /*                                                                        *
  * This script belongs to the TYPO3 Flow package "Lolli.Gaw".             *
@@ -11,21 +11,9 @@ namespace Lolli\Gaw\ViewHelpers\Math;
  * The TYPO3 project - inspiring people to share!                         *
  *                                                                        */
 
-use TYPO3\Fluid\Core\ViewHelper\AbstractViewHelper;
-
 /**
- * Multiply two values
+ * View helper exception
  */
-class MultiplyViewHelper extends AbstractViewHelper {
+class Exception extends \Lolli\Gaw\ViewHelpers\Exception {
 
-	/**
-	 * Multiply two values
-	 *
-	 * @param integer $factorOne
-	 * @param integer $factorTwo
-	 * @return integer product
-	 */
-	public function render($factorOne, $factorTwo) {
-		return $factorOne * $factorTwo;
-	}
 }

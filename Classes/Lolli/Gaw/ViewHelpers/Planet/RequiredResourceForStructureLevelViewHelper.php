@@ -15,9 +15,9 @@ use TYPO3\Fluid\Core\ViewHelper\AbstractViewHelper;
 use TYPO3\Flow\Annotations as Flow;
 
 /**
- * Array with required resources for structure level
+ * Show how much resource of a resource type is required for a structure level
  */
-class RequiredResourcesForStructureLevelViewHelper extends AbstractViewHelper {
+class RequiredResourceForStructureLevelViewHelper extends AbstractViewHelper {
 
 	/**
 	 * @Flow\Inject
@@ -26,14 +26,15 @@ class RequiredResourcesForStructureLevelViewHelper extends AbstractViewHelper {
 	protected $planetCalculationService;
 
 	/**
-	 * Array with required resources for structure level
+	 * Integer required resource of specific type for structure level
 	 *
 	 * @param string $structureName The structure name, eg 'ironMine'
 	 * @param integer $level Level to calculate
+	 * @param string $resourceName Resource, eg 'iron'
 	 * @throws Exception
-	 * @return array Required resources, key is name, value is micro units
+	 * @return integer Required resources in micro units, key is name, value is micro units
 	 */
-	public function render($structureName, $level) {
-		return $this->planetCalculationService->getResourcesRequiredForStructureLevel($structureName, $level);
+	public function render($structureName, $level, $resourceName) {
+		return $this->planetCalculationService->getResourceRequiredForStructureLevel($structureName, $level, $resourceName);
 	}
 }

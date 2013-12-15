@@ -14,18 +14,18 @@ namespace Lolli\Gaw\ViewHelpers\Math;
 use TYPO3\Fluid\Core\ViewHelper\AbstractViewHelper;
 
 /**
- * Multiply two values
+ * Add two integer values
  */
-class MultiplyViewHelper extends AbstractViewHelper {
+class AddViewHelper extends AbstractViewHelper {
 
 	/**
-	 * Multiply two values
+	 * Add two values
 	 *
-	 * @param integer $factorOne
-	 * @param integer $factorTwo
-	 * @return integer product
+	 * @param integer $summandOne
+	 * @param integer $summandTwo
+	 * @return integer sum
 	 */
-	public function render($factorOne, $factorTwo) {
-		return $factorOne * $factorTwo;
+	public function render($summandOne, $summandTwo) {
+		return (int)$summandOne + (int)$summandTwo;
 	}
 }

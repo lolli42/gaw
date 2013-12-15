@@ -79,6 +79,15 @@ class PlanetCalculationService {
 		'energy' => 0.05,
 	);
 
+	protected $structureBuildTime = array(
+		'base' => '$x',
+		'ironMine' => '(50 * pow($x, 3) + 50 * $x) * (1 / $y) * 1000000',
+		'siliconMine' => '(40 * pow($x, 3) + 40 * $x) * (1 / $y) * 1000000',
+		'xenonMine' => '(58 * pow($x, 3) + 58 * $x) * (1 / $y) * 1000000',
+		'hydrazineMine' => '(55 * pow($x, 3) + 55 * $x) * (1 / $y) * 1000000',
+		'energyMine' => '(60 * pow($x, 3) + 60 * $x) * (1 / $y) * 1000000',
+	);
+
 	/**
 	 * Resource production formulas by mine level
 	 * Micro units per micro second!
@@ -223,6 +232,28 @@ class PlanetCalculationService {
 		// 20 secs
 		return 20000000;
 		// return (int)(1000000 * ($planet->getBase() + 1)); // 32 * 60
+	}
+
+	/**
+	 * Calculate time to build a specific structure level depending on base level
+	 *
+	 * @param string $structureName Structure to build, eg. 'ironMine'
+	 * @param integer $level Structure level to build
+	 * @param integer $baseLevel Given Base level
+	 * @return integer $time Time to build structure
+	 * @throws Exception
+	 */
+	public function getBuildTimeOfStructureByBaseLevel($structureName, $level, $baseLevel) {
+		if (!isset($this->structureBuildTime[$structureName])) {
+			throw new Exception('Structure does not exist', 1387136244);
+		}
+		if (!is_integer($level) || $level < 0) {
+			throw new Exception('Level must be positive integer', 1387136323);
+		}
+		if (!is_integer($baseLevel) || $baseLevel <= 0) {
+			throw new Exception('Level must be positive integer', 1387136361);
+		}
+		return $this->evaluateFormula($this->structureBuildTime[$structureName], $level, $baseLevel);
 	}
 
 	/**
@@ -422,13 +453,19 @@ class PlanetCalculationService {
 	 *
 	 * @param string $formula Formula to be evaluated
 	 * @param integer $x X
+	 * @param integer $y Y Second argument if given
 	 * @throws Exception
 	 * @return float Result
 	 */
-	protected function evaluateFormula($formula, $x) {
+	protected function evaluateFormula($formula, $x, $y = NULL) {
 		if (!is_integer($x) || $x < 0) {
 			throw new Exception(
 				'x is not an integer or smaller than zero', 1386872139
+			);
+		}
+		if (!is_null($y) && (!is_integer($y) || $y < 0)) {
+			throw new Exception(
+				'y is not an integer or smaller than zero', 1387135993
 			);
 		}
 		$result = 0;

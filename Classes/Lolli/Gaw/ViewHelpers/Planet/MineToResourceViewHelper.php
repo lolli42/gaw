@@ -1,5 +1,5 @@
 <?php
-namespace Lolli\Gaw\ViewHelpers\Math;
+namespace Lolli\Gaw\ViewHelpers\Planet;
 
 /*                                                                        *
  * This script belongs to the TYPO3 Flow package "Lolli.Gaw".             *
@@ -12,20 +12,31 @@ namespace Lolli\Gaw\ViewHelpers\Math;
  *                                                                        */
 
 use TYPO3\Fluid\Core\ViewHelper\AbstractViewHelper;
+use TYPO3\Flow\Annotations as Flow;
 
 /**
- * Multiply two values
+ * Get resource name from a mine name
  */
-class MultiplyViewHelper extends AbstractViewHelper {
+class MineToResourceViewHelper extends AbstractViewHelper {
 
 	/**
-	 * Multiply two values
-	 *
-	 * @param integer $factorOne
-	 * @param integer $factorTwo
-	 * @return integer product
+	 * @Flow\Inject
+	 * @var \Lolli\Gaw\Service\PlanetCalculationService
 	 */
-	public function render($factorOne, $factorTwo) {
-		return $factorOne * $factorTwo;
+	protected $planetCalculationService;
+
+	/**
+	 * Resource that is produced at this mine
+	 *
+	 * @param string $mineName
+	 * @return string Resource name
+	 * @throws Exception
+	 */
+	public function render($mineName) {
+		if (substr($mineName, -4) !== 'Mine') {
+			throw new Exception('No such mine', 1387132617);
+		}
+		// @TODO: Sanitize resource name exists
+		return substr($mineName, 0, -4);
 	}
 }
