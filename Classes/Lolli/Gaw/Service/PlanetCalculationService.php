@@ -80,6 +80,20 @@ class PlanetCalculationService {
 	);
 
 	/**
+	 * Resource production formulas by mine level
+	 * Micro units per micro second!
+	 *
+	 * @var array
+	 */
+	protected $mineProduction = array(
+		'ironMine' => '(4 * pow($x, 2) + 20 * $x) / 60 / 60',
+		'siliconMine' => '(5 * pow($x, 2) + 30 * $x) / 60 / 60',
+		'xenonMine' => '(3 * pow($x, 2) + 12 * $x) / 60 / 60',
+		'hydrazineMine' => '(6 * pow($x, 2) + 40 * $x) / 60 / 60',
+		'energyMine' => '(4 * pow($x, 2) + 20 * $x) / 60 / 60',
+	);
+
+	/**
 	 * Formulas for resource calculations of structure building level requirements
 	 *
 	 * @var array
@@ -265,11 +279,6 @@ class PlanetCalculationService {
 	 * @throws Exception
 	 */
 	public function getResourceRequiredForStructureLevel($structureName, $x, $resourceName) {
-		if (!is_integer($x) || $x < 0) {
-			throw new Exception(
-				'Structure level is out of bounds or smaller than zero', 1386872139
-			);
-		}
 		if (!isset($this->structureResourceRequirements[$structureName])) {
 			throw new Exception(
 				'Structure does not exist', 1386872359
@@ -278,8 +287,7 @@ class PlanetCalculationService {
 		$units = 0;
 		if (isset($this->structureResourceRequirements[$structureName][$resourceName])) {
 			$formula = $this->structureResourceRequirements[$structureName][$resourceName];
-			eval('$units = ' . $formula . ';');
-			$units = (int)round($units);
+			$units = (int)round($this->evaluateFormula($formula, $x));
 		}
 		return $units;
 	}
@@ -329,11 +337,23 @@ class PlanetCalculationService {
 			throw new Exception('Given time must not be lower than last resource update time', 1386523956);
 		}
 		$elapsedTime = $time - $planet->getLastResourceUpdate();
-		$iron = (int)($elapsedTime * $this->basicProduction['iron']);
-		$silicon = (int)($elapsedTime * $this->basicProduction['silicon']);
-		$xenon = (int)($elapsedTime * $this->basicProduction['xenon']);
-		$hydrazine = (int)($elapsedTime * $this->basicProduction['hydrazine']);
-		$energy = (int)($elapsedTime * $this->basicProduction['energy']);
+
+		$ironByMine = $this->resourceProductionByTimeAndMineLevel('iron', $elapsedTime, $planet->getIronMine());
+		$iron = (int)($elapsedTime * $this->basicProduction['iron'] + $ironByMine);
+
+		$siliconByMine = $this->resourceProductionByTimeAndMineLevel('silicon', $elapsedTime, $planet->getSiliconMine());
+		$silicon = (int)($elapsedTime * $this->basicProduction['silicon'] + $siliconByMine);
+
+		$xenonByMine = $this->resourceProductionByTimeAndMineLevel('xenon', $elapsedTime, $planet->getXenonMine());
+		$xenon = (int)($elapsedTime * $this->basicProduction['xenon'] + $xenonByMine);
+
+		$hydrazineByMine = $this->resourceProductionByTimeAndMineLevel('hydrazine', $elapsedTime, $planet->getHydrazineMine());
+		$hydrazine = (int)($elapsedTime * $this->basicProduction['hydrazine'] + $hydrazineByMine);
+
+		// @TODO: Combine energy and hydrazine
+		$energyByMine = $this->resourceProductionByTimeAndMineLevel('hydrazine', $elapsedTime, $planet->getEnergyMine());
+		$energy = (int)($elapsedTime * $this->basicProduction['energy'] + $energyByMine);
+
 		return array(
 			'iron' => $iron,
 			'silicon' => $silicon,
@@ -341,5 +361,55 @@ class PlanetCalculationService {
 			'hydrazine' => $hydrazine,
 			'energy' => $energy,
 		);
+	}
+
+	/**
+	 * Calculate resource production of mine in given time frame and mine level
+	 *
+	 * @param string $resource Resource to calculate
+	 * @param integer $time Timeframe in micro seconds
+	 * @param integer $level Mine level
+	 * @throws Exception
+	 * @return integer Production
+	 */
+	public function resourceProductionByTimeAndMineLevel($resource, $time, $level) {
+		if (!is_integer($time) || $time <= 0) {
+			throw new Exception(
+				'Time is not a positive integer', 1387110946
+			);
+		}
+		if (!is_integer($level) || $level < 0) {
+			throw new Exception(
+				'Level is not a positive integer', 1387110998
+			);
+		}
+		$mine = $resource . 'Mine';
+		if (!isset($this->mineProduction[$mine])) {
+			throw new Exception(
+				'Mine formula not set', 1387111072
+			);
+		}
+		$microUnitsPerMicroSecond = $this->evaluateFormula($this->mineProduction[$mine], $level);
+		$production = (int)round($time * $microUnitsPerMicroSecond);
+		return $production;
+	}
+
+	/**
+	 * Evaluate given formula
+	 *
+	 * @param string $formula Formula to be evaluated
+	 * @param integer $x X
+	 * @throws Exception
+	 * @return float Result
+	 */
+	protected function evaluateFormula($formula, $x) {
+		if (!is_integer($x) || $x < 0) {
+			throw new Exception(
+				'x is not an integer or smaller than zero', 1386872139
+			);
+		}
+		$result = 0;
+		eval('$result = ' . $formula . ';');
+		return $result;
 	}
 }
