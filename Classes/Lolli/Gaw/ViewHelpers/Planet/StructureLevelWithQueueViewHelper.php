@@ -19,7 +19,7 @@ use Lolli\Gaw\Domain\Model\Planet;
  * Get next structure level that is not queued yet.
  * Example: base is 4, and 2 other bases are queued, it will return 7
  */
-class NextNotQueuedStructureLevelViewHelper extends AbstractViewHelper {
+class StructureLevelWithQueueViewHelper extends AbstractViewHelper {
 
 	/**
 	 * @Flow\Inject
@@ -32,10 +32,11 @@ class NextNotQueuedStructureLevelViewHelper extends AbstractViewHelper {
 	 *
 	 * @param string $structureName The structure to find next level for
 	 * @param Planet $planet The planet to check
+	 * @param integer $offset Additional offset (default +1)
 	 * @throws Exception
 	 * @return boolean TRUE if structure is available
 	 */
-	public function render($structureName, $planet = NULL) {
+	public function render($structureName, $planet = NULL, $offset = 1) {
 		if ($planet === NULL) {
 			$planet = $this->renderChildren();
 		}
@@ -47,7 +48,7 @@ class NextNotQueuedStructureLevelViewHelper extends AbstractViewHelper {
 		if (!method_exists($planet, $method)) {
 			throw new Exception('Structure does not exist', 1386879358);
 		}
-		$offset = 1;
+		$offset = (int)$offset;
 		$currentLevel = $planet->$method();
 		$inQueue = $this->planetCalculationService->countSpecificStructuresInBuildQueue($planet, $structureName);
 		return $offset + $currentLevel + $inQueue;

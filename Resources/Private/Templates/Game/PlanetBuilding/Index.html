@@ -84,16 +84,34 @@
 				<f:alias
 					map="{
 						currentLevel: '{selectedPlanet -> gaw:property(propertyName: structureName)}'
-						nextLevel: '{selectedPlanet -> gaw:planet.nextNotQueuedStructureLevel(structureName: structureName)}'
+						nextLevel: '{selectedPlanet -> gaw:planet.structureLevelWithQueue(structureName: structureName)}'
+						baseLevel: '{selectedPlanet -> gaw:planet.structureLevelWithQueue(structureName: \'base\', offset: \'0\')}'
 					}"
 				>
 					<tr>
 						<td>
+							<f:comment>
+								BROKEN:
+								Should add time to build structure to last ready time in queue if set
+								<span class="right">
+									<gaw:format.realTimeOffset
+										realTime="{realTime}"
+										offset="{gaw:planet.buildTimeOfStructureByBaseLevel(
+											structureName: structureName,
+											level: nextLevel,
+											baseLevel: baseLevel
+										)}"
+									/>
+								</span>
+							</f:comment>
+
 							<f:link.action action="productionMatrix" arguments="{structureName: structureName}">
 								<f:translate id="planet.{structureName}" />
 							</f:link.action>
 							<span class="entity-available">[{currentLevel}]</span>
+
 							<br />
+
 							<f:for
 								each="{gaw:planet.requiredResourcesForStructureLevel(structureName: structureName, level: nextLevel)}"
 								as="microunit"
@@ -109,6 +127,16 @@
 									</f:else>
 								</f:if>
 							</f:for>
+
+							<span class="right">
+								<gaw:format.time>
+									<gaw:planet.buildTimeOfStructureByBaseLevel
+										structureName="{structureName}"
+										level="{nextLevel}"
+										baseLevel="{baseLevel}"
+										/>
+								</gaw:format.time>
+							</span>
 						</td>
 						<td>
 							<f:if condition="{currentStructureBuildQueueLength} < {settings.Game.Planet.maximumStructureQueueLength}">

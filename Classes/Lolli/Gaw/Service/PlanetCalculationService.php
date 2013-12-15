@@ -233,10 +233,16 @@ class PlanetCalculationService {
 	 * @return integer seconds
 	 */
 	public function getBuildTimeOfStructure(Planet $planet, $structureName) {
-		// @TODO: Method needs to check queue if a base is queued for the same building already
-		// 20 secs
-		return 20000000;
-		// return (int)(1000000 * ($planet->getBase() + 1)); // 32 * 60
+		$currentBase = $planet->getBase();
+		$numberOfBasesInQueue = $this->countSpecificStructuresInBuildQueue($planet, 'base');
+		$baseLevel = $currentBase + $numberOfBasesInQueue;
+
+		$structureGetter = 'get' . ucfirst($structureName);
+		$currentStructure = $planet->$structureGetter();
+		$numberOfStructuresInQueue = $this->countSpecificStructuresInBuildQueue($planet, $structureName);
+		$structureLevel = $currentStructure + $numberOfStructuresInQueue + 1;
+
+		return $this->getBuildTimeOfStructureByBaseLevel($structureName, $structureLevel, $baseLevel);
 	}
 
 	/**
@@ -258,7 +264,7 @@ class PlanetCalculationService {
 		if (!is_integer($baseLevel) || $baseLevel <= 0) {
 			throw new Exception('Level must be positive integer', 1387136361);
 		}
-		return $this->evaluateFormula($this->structureBuildTime[$structureName], $level, $baseLevel);
+		return (int)round($this->evaluateFormula($this->structureBuildTime[$structureName], $level, $baseLevel));
 	}
 
 	/**
