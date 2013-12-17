@@ -85,7 +85,7 @@ class PlanetCalculationService {
 	 * @var array
 	 */
 	protected $structureBuildTime = array(
-		'base' => '120 * pow($x, 2) * 1000000',
+		'base' => '50 * pow($x, 2) * 1000000',
 		'ironMine' => '(50 * pow($x, 3) + 50 * $x) * (1 / $y) * 1000000',
 		'siliconMine' => '(40 * pow($x, 3) + 40 * $x) * (1 / $y) * 1000000',
 		'xenonMine' => '(58 * pow($x, 3) + 58 * $x) * (1 / $y) * 1000000',
