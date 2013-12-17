@@ -36,10 +36,10 @@ class RealTimeViewHelper extends AbstractViewHelper {
 		if ($subjectTime === NULL) {
 			$subjectTime = $gameTime;
 		}
-		// Round to seconds
-		$realTime = round($realTime / 1000000);
-		$offset = round(($subjectTime - $gameTime) / 1000000);
-		$realTimeSubject = $realTime + $offset;
+
+		$offset = $subjectTime - $gameTime;
+		$realTimeSubject = round(($realTime + $offset) / 1000000);
+
 		$date = new \DateTime('@' . $realTimeSubject);
 		$timezone = new \DateTimeZone('Europe/Berlin');
 		$date->setTimezone($timezone);
