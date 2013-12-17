@@ -367,27 +367,41 @@ class PlanetCalculationService {
 	}
 
 	/**
-	 * Calculate resources produced by planet until given time
+	 * Returns array of planet resource production at given time
 	 *
-	 * @param Planet $planet Planet to work on
-	 * @param integer $time Absolute game time in microseconds
-	 * @throws Exception If time is in the past in comparison to last resource update time
-	 * @return array Resources
+	 * @param Planet $planet
+	 * @param $time
+	 * @return array
+	 * @throws Exception
 	 */
 	public function resourcesProducedUntil(Planet $planet, $time) {
 		if ($time < $planet->getLastResourceUpdate()) {
+			// @TODO: I got an exception here once after restarting worker and dispatcher, figure out how that could happen
 			throw new Exception('Given time must not be lower than last resource update time', 1386523956);
 		}
 		$elapsedTime = $time - $planet->getLastResourceUpdate();
 
-		// @TODO: Combine energy and hydrazine
+		$iron = (int)($this->resourceFullProductionByTimeLevel('iron', $elapsedTime, $planet->getIronMine(), $planet->getEnergyMine()));
+		$silicon = (int)($this->resourceFullProductionByTimeLevel('silicon', $elapsedTime, $planet->getSiliconMine(), $planet->getEnergyMine()));
+		$xenon = (int)($this->resourceFullProductionByTimeLevel('xenon', $elapsedTime, $planet->getXenonMine(), $planet->getEnergyMine()));
+
+		$producedHydrazine = (int)($this->resourceFullProductionByTimeLevel('hydrazine', $elapsedTime, $planet->getHydrazineMine(), $planet->getEnergyMine()));
+		$energy = (int)($this->resourceFullProductionByTimeLevel('energy', $elapsedTime, $planet->getEnergyMine(), $planet->getEnergyMine()));
+		$currentHydrazine = $planet->getHydrazine();
+		if ($producedHydrazine < 0 && ($currentHydrazine + $producedHydrazine) < 0) {
+			// If energy production sucks up hydrazine and no hydrazine is left
+			$hydrazine = -1 * $currentHydrazine; // sets "new" value to 0
+			$energy = $currentHydrazine; // energy produced as much hydrazine was there plus current production
+		} else {
+			$hydrazine = $producedHydrazine;
+		}
 
 		return array(
-			'iron' => (int)($this->resourceFullProductionByTimeLevel('iron', $elapsedTime, $planet->getIronMine())),
-			'silicon' => (int)($this->resourceFullProductionByTimeLevel('silicon', $elapsedTime, $planet->getSiliconMine())),
-			'xenon' => (int)($this->resourceFullProductionByTimeLevel('xenon', $elapsedTime, $planet->getXenonMine())),
-			'hydrazine' => (int)($this->resourceFullProductionByTimeLevel('hydrazine', $elapsedTime, $planet->getHydrazineMine())),
-			'energy' => (int)($this->resourceFullProductionByTimeLevel('energy', $elapsedTime, $planet->getEnergyMine())),
+			'iron' => $iron,
+			'silicon' => $silicon,
+			'xenon' => $xenon,
+			'hydrazine' => $hydrazine,
+			'energy' => $energy,
 		);
 	}
 
@@ -397,12 +411,21 @@ class PlanetCalculationService {
 	 * @param string $resource Resource to calculate
 	 * @param integer $time Time frame in micro seconds
 	 * @param integer $level Mine level
+	 * @param integer $energyMineLevel Energy mine level - needed for hydrazine drain
 	 * @throws Exception
 	 * @return integer Production
 	 */
-	public function resourceFullProductionByTimeLevel($resource, $time, $level) {
-		$basicProduction = $this->resourceBasicProductionByTime($resource, $time);
-		$mineProduction = $this->resourceMineProductionByTimeAndMineLevel($resource, $time, $level);
+	public function resourceFullProductionByTimeLevel($resource, $time, $level, $energyMineLevel) {
+		// @TODO: This feels weird, maybe Planet should be given to this method to reduce number of arguments?!
+		if ($resource === 'hydrazine') {
+			$basicProduction = $this->resourceBasicProductionByTime($resource, $time);
+			$mineHydrazineProduction = $this->resourceMineProductionByTimeAndMineLevel('hydrazine', $time, $level);
+			$mineEnergyProduction = $this->resourceMineProductionByTimeAndMineLevel('energy', $time, $energyMineLevel);
+			$mineProduction = $mineHydrazineProduction - $mineEnergyProduction;
+		} else {
+			$basicProduction = $this->resourceBasicProductionByTime($resource, $time);
+			$mineProduction = $this->resourceMineProductionByTimeAndMineLevel($resource, $time, $level);
+		}
 		return (int)($basicProduction + $mineProduction);
 	}
 

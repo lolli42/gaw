@@ -151,6 +151,93 @@ class PlanetCalculationServiceTest extends \TYPO3\Flow\Tests\UnitTestCase {
 	/**
 	 * @test
 	 */
+	public function resourcesProducedUntilCalculatesHydrazineAndEnergyCorrectlyIfHydrazineIsHigherThanEnergy() {
+		/** @var \Lolli\Gaw\Service\PlanetCalculationService|\PHPUnit_Framework_MockObject_MockObject $subject */
+		$subject = $this->getAccessibleMock('Lolli\Gaw\Service\PlanetCalculationService', array('resourceFullProductionByTimeLevel'), array(), '', FALSE);
+
+		/** @var \Lolli\Gaw\Domain\Model\Planet|\PHPUnit_Framework_MockObject_MockObject $planetMock */
+		$planetMock = $this->getMock('\Lolli\Gaw\Domain\Model\Planet', array(), array(), '', FALSE);
+		$planetMock->expects($this->any())->method('getLastResourceUpdate')->will($this->returnValue(0));
+		$planetMock->expects($this->any())->method('getIronMine')->will($this->returnValue(0));
+		$planetMock->expects($this->any())->method('getSiliconMine')->will($this->returnValue(0));
+		$planetMock->expects($this->any())->method('getXenonMine')->will($this->returnValue(0));
+		$planetMock->expects($this->any())->method('getHydrazineMine')->will($this->returnValue(0));
+		$planetMock->expects($this->any())->method('getEnergyMine')->will($this->returnValue(0));
+
+		$subject->expects($this->at(0))->method('resourceFullProductionByTimeLevel')->will($this->returnValue(0));
+		$subject->expects($this->at(1))->method('resourceFullProductionByTimeLevel')->will($this->returnValue(0));
+		$subject->expects($this->at(2))->method('resourceFullProductionByTimeLevel')->will($this->returnValue(0));
+
+		// 12 hydrazine is there, 10 hy is produced with nrg drain, 3 nrg is produced -> 10 hy and 3 nrg should be added
+		$planetMock->expects($this->once())->method('getHydrazine')->will($this->returnValue(12));
+		$subject->expects($this->at(3))->method('resourceFullProductionByTimeLevel')->will($this->returnValue(10));
+		$subject->expects($this->at(4))->method('resourceFullProductionByTimeLevel')->will($this->returnValue(3));
+		$result = $subject->resourcesProducedUntil($planetMock, 60*60*1000000);
+		$this->assertSame(10, $result['hydrazine']);
+		$this->assertSame(3, $result['energy']);
+	}
+
+	/**
+	 * @test
+	 */
+	public function resourcesProducedUntilCalculatesHydrazineAndEnergyCorrectlyIfHydrazineIsLowerThanEnergy() {
+		/** @var \Lolli\Gaw\Service\PlanetCalculationService|\PHPUnit_Framework_MockObject_MockObject $subject */
+		$subject = $this->getAccessibleMock('Lolli\Gaw\Service\PlanetCalculationService', array('resourceFullProductionByTimeLevel'), array(), '', FALSE);
+
+		/** @var \Lolli\Gaw\Domain\Model\Planet|\PHPUnit_Framework_MockObject_MockObject $planetMock */
+		$planetMock = $this->getMock('\Lolli\Gaw\Domain\Model\Planet', array(), array(), '', FALSE);
+		$planetMock->expects($this->any())->method('getLastResourceUpdate')->will($this->returnValue(0));
+		$planetMock->expects($this->any())->method('getIronMine')->will($this->returnValue(0));
+		$planetMock->expects($this->any())->method('getSiliconMine')->will($this->returnValue(0));
+		$planetMock->expects($this->any())->method('getXenonMine')->will($this->returnValue(0));
+		$planetMock->expects($this->any())->method('getHydrazineMine')->will($this->returnValue(0));
+		$planetMock->expects($this->any())->method('getEnergyMine')->will($this->returnValue(0));
+
+		$subject->expects($this->at(0))->method('resourceFullProductionByTimeLevel')->will($this->returnValue(0));
+		$subject->expects($this->at(1))->method('resourceFullProductionByTimeLevel')->will($this->returnValue(0));
+		$subject->expects($this->at(2))->method('resourceFullProductionByTimeLevel')->will($this->returnValue(0));
+
+		// 12 hydrazine is there, -3 hy is produced, 13 nrg is produced -> 3 hy should be removed, 13 nrg added
+		$planetMock->expects($this->once())->method('getHydrazine')->will($this->returnValue(12));
+		$subject->expects($this->at(3))->method('resourceFullProductionByTimeLevel')->will($this->returnValue(-3));
+		$subject->expects($this->at(4))->method('resourceFullProductionByTimeLevel')->will($this->returnValue(13));
+		$result = $subject->resourcesProducedUntil($planetMock, 60*60*1000000);
+		$this->assertSame(-3, $result['hydrazine']);
+		$this->assertSame(13, $result['energy']);
+	}
+
+	/**
+	 * @test
+	 */
+	public function resourcesProducedUntilCalculatesHydrazineAndEnergyCorrectlyIfHydrazineIsLowerThanEnergyAndNotEnoughHydrazineIsLeft() {
+		/** @var \Lolli\Gaw\Service\PlanetCalculationService|\PHPUnit_Framework_MockObject_MockObject $subject */
+		$subject = $this->getAccessibleMock('Lolli\Gaw\Service\PlanetCalculationService', array('resourceFullProductionByTimeLevel'), array(), '', FALSE);
+
+		/** @var \Lolli\Gaw\Domain\Model\Planet|\PHPUnit_Framework_MockObject_MockObject $planetMock */
+		$planetMock = $this->getMock('\Lolli\Gaw\Domain\Model\Planet', array(), array(), '', FALSE);
+		$planetMock->expects($this->any())->method('getLastResourceUpdate')->will($this->returnValue(0));
+		$planetMock->expects($this->any())->method('getIronMine')->will($this->returnValue(0));
+		$planetMock->expects($this->any())->method('getSiliconMine')->will($this->returnValue(0));
+		$planetMock->expects($this->any())->method('getXenonMine')->will($this->returnValue(0));
+		$planetMock->expects($this->any())->method('getHydrazineMine')->will($this->returnValue(0));
+		$planetMock->expects($this->any())->method('getEnergyMine')->will($this->returnValue(0));
+
+		$subject->expects($this->at(0))->method('resourceFullProductionByTimeLevel')->will($this->returnValue(0));
+		$subject->expects($this->at(1))->method('resourceFullProductionByTimeLevel')->will($this->returnValue(0));
+		$subject->expects($this->at(2))->method('resourceFullProductionByTimeLevel')->will($this->returnValue(0));
+
+		// 11 hydrazine is there, -13 hy is produced with nrg drain, 27 nrg base is produced -> 11 should be removed, 11 nrg produced
+		$planetMock->expects($this->once())->method('getHydrazine')->will($this->returnValue(11));
+		$subject->expects($this->at(3))->method('resourceFullProductionByTimeLevel')->will($this->returnValue(-13));
+		$subject->expects($this->at(4))->method('resourceFullProductionByTimeLevel')->will($this->returnValue(27));
+		$result = $subject->resourcesProducedUntil($planetMock, 60*60*1000000);
+		$this->assertSame(-11, $result['hydrazine']);
+		$this->assertSame(11, $result['energy']);
+	}
+
+	/**
+	 * @test
+	 */
 	public function resourceProductionByTimeAndMineLevelCalculatesIronProductionIronMineZero() {
 		$microSeconds = 1;
 		$level = 0;

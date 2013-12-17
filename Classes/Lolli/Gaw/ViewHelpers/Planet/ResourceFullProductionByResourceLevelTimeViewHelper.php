@@ -30,13 +30,13 @@ class ResourceFullProductionByResourceLevelTimeViewHelper extends AbstractViewHe
 	 *
 	 * @param string $resource Identifier, eg. "iron"
 	 * @param integer $level Mine level
+	 * @param integer $energyMineLevel Energy mine level - needed for hydrazine drain
 	 * @param integer $time Time in microseconds
-	 * @throws Exception
 	 * @return integer Micro units
 	 */
-	public function render($resource, $level, $time) {
+	public function render($resource, $level, $energyMineLevel, $time) {
 		$time = (int)$time;
 		$level = (int)$level;
-		return $this->planetCalculationService->resourceFullProductionByTimeLevel($resource, $time, $level);
+		return $this->planetCalculationService->resourceFullProductionByTimeLevel($resource, $time, $level, $energyMineLevel);
 	}
 }
