@@ -72,11 +72,11 @@ class PlanetCalculationService {
 	 * @var array
 	 */
 	protected $basicProduction = array(
-		'iron' => 0.05, // micro units per micro second -> 60 * 60 -> 180 units / h
-		'silicon' => 0.05,
-		'xenon' => 0.05,
-		'hydrazine' => 0.05,
-		'energy' => 0.05,
+		'iron' => 0.139, // 500 hour
+		'silicon' => 0.111, // 400 hour
+		'xenon' => 0.0555, // 200 hour
+		'hydrazine' => 0.089, // 320 hour
+		'energy' => 0.0555, // 200 hour
 	);
 
 	/**
