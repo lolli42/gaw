@@ -15,7 +15,7 @@ Lolli:
             controllerName: Authentication
     Game:
       Planet:
-        maximumStructureQueueLength: 3
+        maximumStructureQueueLength: 5
 
 TYPO3:
   Flow:
