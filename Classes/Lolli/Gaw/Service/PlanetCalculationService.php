@@ -101,9 +101,9 @@ class PlanetCalculationService {
 	 */
 	protected $mineProduction = array(
 		'ironMine' => '(4 * pow($x, 2) + 20 * $x) / 60 / 60',
-		'siliconMine' => '(5 * pow($x, 2) + 30 * $x) / 60 / 60',
-		'xenonMine' => '(3 * pow($x, 2) + 12 * $x) / 60 / 60',
-		'hydrazineMine' => '(6 * pow($x, 2) + 40 * $x) / 60 / 60',
+		'siliconMine' => '(4.5 * pow($x, 2) + 30 * $x) / 60 / 60',
+		'xenonMine' => '(3.5 * pow($x, 2) + 12 * $x) / 60 / 60',
+		'hydrazineMine' => '(5 * pow($x, 2) + 40 * $x) / 60 / 60',
 		'energyMine' => '(4 * pow($x, 2) + 20 * $x) / 60 / 60',
 	);
 
