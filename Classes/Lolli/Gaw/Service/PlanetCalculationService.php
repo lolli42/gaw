@@ -29,23 +29,23 @@ class PlanetCalculationService {
 	protected $structureTechTree = array(
 		'base' => array(),
 		'ironMine' => array(
-			'base' => 1,
+			'base' => '$x',
 		),
 		'siliconMine' => array(
-			'base' => 1,
+			'base' => '$x',
 		),
 		'xenonMine' => array(
-			'base' => 2,
+			'base' => '$x',
 			'ironMine' => 1,
 			'siliconMine' => 1,
 		),
 		'hydrazineMine' => array(
-			'base' => 2,
+			'base' => '$x',
 			'ironMine' => 1,
 			'siliconMine' => 1,
 		),
 		'energyMine' => array(
-			'base' => 2,
+			'base' => '$x',
 			'ironMine' => 1,
 			'siliconMine' => 1,
 			'hydrazineMine' => 2,
@@ -173,35 +173,47 @@ class PlanetCalculationService {
 	}
 
 	/**
-	 * Get structure techtree
-	 *
-	 * @return array
-	 */
-	public function getStructureTechTree() {
-		return $this->structureTechTree;
-	}
-
-	/**
 	 * Whether a structure can be build on planet according to tech tree
 	 *
 	 * @param Planet $planet Planet to check
 	 * @param string $structure The structure to build
+	 * @param integer $level Structure level to build
 	 * @throws Exception
 	 * @return boolean TRUE if structure can be build
 	 */
-	public function isStructureAvailable(Planet $planet, $structure) {
+	public function isStructureAvailable(Planet $planet, $structure, $level) {
+		$result = TRUE;
+		$techTreeOfStructure = $this->getStructureTechTreeRequirements($structure, $level);
+		foreach ($techTreeOfStructure as $requiredStructureName => $requiredLevel) {
+			$currentRequiredStructureQueue = $this->countSpecificStructuresInBuildQueue($planet, $requiredStructureName);
+			$currentRequiredStructurePropertyName = 'get' . ucfirst($requiredStructureName);
+			$currentRequiredStructureLevel = $currentRequiredStructureQueue + $planet->$currentRequiredStructurePropertyName();
+			if ($currentRequiredStructureLevel < $requiredLevel) {
+				$result = FALSE;
+			}
+		}
+		return $result;
+	}
+
+	/**
+	 * Calculate tech requirements for a specific structure level
+	 *
+	 * @param string $structure Handled structure
+	 * @param integer $level Structure level to build
+	 * @return array
+	 * @throws Exception
+	 */
+	public function getStructureTechTreeRequirements($structure, $level) {
 		if (!isset($this->structureTechTree[$structure])) {
 			throw new Exception(
 				'Structure not in techtree', 1386595094
 			);
 		}
+		$result = array();
 		$techTreeOfStructure = $this->structureTechTree[$structure];
-		$result = TRUE;
-		foreach ($techTreeOfStructure as $structureName => $requiredLevel) {
-			$propertyName = 'get' . ucfirst($structureName);
-			if ($planet->$propertyName() < $requiredLevel) {
-				$result = FALSE;
-			}
+		foreach ($techTreeOfStructure as $structureName => $requiredLevelFormula) {
+			$requiredLevel = $this->evaluateFormula($requiredLevelFormula, $level);
+			$result[$structureName] = $requiredLevel;
 		}
 		return $result;
 	}

@@ -157,18 +157,18 @@ class WorkerCommandController extends \TYPO3\Flow\Cli\CommandController {
 
 		$structureName = $data['structureName'];
 
-		// Do not queue if building is not available due to tech tree: Should technically not happen -> not catchable!
-		if (!$this->planetCalculationService->isStructureAvailable($planet, $structureName)) {
-			throw new Exception\WorkerException(
-				'Can not queue structure building, tech tree not fulfilled', 1386886693
-			);
-		}
-
 		// Next level to build
 		$method = 'get' . ucfirst($structureName);
 		$currentLevel = $planet->$method();
 		$inQueue = $this->planetCalculationService->countSpecificStructuresInBuildQueue($planet, $structureName);
 		$nextLevel = $currentLevel + $inQueue + 1;
+
+		// Do not queue if building is not available due to tech tree: May happen if using multiple tabs -> catchable!
+		if (!$this->planetCalculationService->isStructureAvailable($planet, $structureName, $nextLevel)) {
+			throw new Exception\CatchableWorkerException(
+				'Can not queue structure building, tech tree not fulfilled', 1386886693
+			);
+		}
 
 		// Do not queue if resources are not available: May eg. happen if something else was build in other tab -> catchable!
 		$requiredResources = $this->planetCalculationService->getResourcesRequiredForStructureLevel($structureName, $nextLevel);

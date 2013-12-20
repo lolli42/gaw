@@ -55,7 +55,6 @@ class PlanetBuildingController extends AbstractGameController {
 			array(
 				'realTime' => $this->redisFacade->getRealTimeNow(),
 				'gameTime' => $this->redisFacade->getGameTimeNow(),
-				'structureTechTree' => $planetCalculationService->getStructureTechTree(),
 				'currentStructureBuildQueueLength' => $this->selectedPlanet->getStructureBuildQueue()->count(),
 				'pointsByStructure' => $planetCalculationService->getPointsByStructure(),
 			)

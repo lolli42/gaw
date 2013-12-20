@@ -64,8 +64,13 @@
 	<table>
 		<thead>
 			<tr>
-				<th colspan="2">
+				<th>
 					Gebäude
+				</th>
+				<th>
+					Bauzeit
+				</th>
+				<th>
 				</th>
 			</tr>
 		</thead>
@@ -80,117 +85,218 @@
 			}"
 			as="structureName"
 		>
-			<f:if condition="{selectedPlanet -> gaw:planet.isStructureAvailable(structureName: structureName)}">
-				<f:alias
-					map="{
-						currentLevel: '{selectedPlanet -> gaw:property(propertyName: structureName)}'
-						nextLevel: '{selectedPlanet -> gaw:planet.structureLevelWithQueue(structureName: structureName)}'
-						baseLevel: '{selectedPlanet -> gaw:planet.structureLevelWithQueue(structureName: \'base\', offset: \'0\')}'
-					}"
-				>
-					<tr>
-						<td>
-							<f:comment>
-								BROKEN:
-								Should add time to build structure to last ready time in queue if set
-								<span class="right">
-									<gaw:format.realTimeOffset
-										realTime="{realTime}"
-										offset="{gaw:planet.buildTimeOfStructureByBaseLevel(
-											structureName: structureName,
-											level: nextLevel,
-											baseLevel: baseLevel
-										)}"
-									/>
-								</span>
-							</f:comment>
-
-							<f:link.action action="productionMatrix" arguments="{structureName: structureName}">
-								<f:translate id="planet.{structureName}" />
-							</f:link.action>
-							<span class="entity-available">[{currentLevel}]</span>
-
-							<br />
-
-							<f:for
-								each="{gaw:planet.requiredResourcesForStructureLevel(structureName: structureName, level: nextLevel)}"
-								as="microunit"
-								key="resourceName"
-							>
-								<f:translate id="resource.short.{resourceName}" />:
-								<f:if condition="{microunit} < {gaw:property(propertyName: resourceName, object: selectedPlanet)}">
-									<f:then>
-										<span class="entity-available">{microunit -> gaw:format.unit()}</span>
-									</f:then>
-									<f:else>
-										<span class="entity-not-available">{microunit -> gaw:format.unit()}</span>
-									</f:else>
-								</f:if>
-							</f:for>
-
+			<f:alias
+				map="{
+					currentLevel: '{selectedPlanet -> gaw:property(propertyName: structureName)}'
+					nextLevel: '{selectedPlanet -> gaw:planet.structureLevelWithQueue(structureName: structureName)}'
+					baseLevel: '{selectedPlanet -> gaw:planet.structureLevelWithQueue(structureName: \'base\', offset: \'0\')}'
+				}"
+			>
+				<tr>
+					<td>
+						<f:comment>
+							BROKEN:
+							Should add time to build structure to last ready time in queue if set
 							<span class="right">
-								<gaw:format.time>
-									<gaw:planet.buildTimeOfStructureByBaseLevel
-										structureName="{structureName}"
-										level="{nextLevel}"
-										baseLevel="{baseLevel}"
-										/>
-								</gaw:format.time>
+								<gaw:format.realTimeOffset
+									realTime="{realTime}"
+									offset="{gaw:planet.buildTimeOfStructureByBaseLevel(
+										structureName: structureName,
+										level: nextLevel,
+										baseLevel: baseLevel
+									)}"
+								/>
 							</span>
-						</td>
-						<td>
+						</f:comment>
+
+						<f:link.action action="productionMatrix" arguments="{structureName: structureName}">
+							<f:translate id="planet.{structureName}" />
+						</f:link.action>
+
+						<span class="entity-available">[{currentLevel}]</span>
+						->
+						<f:if condition="{selectedPlanet -> gaw:planet.isStructureAvailable(structureName: structureName, structureLevel: nextLevel)}">
+							<f:then>
+								<span class="entity-available">[{nextLevel}]</span>
+							</f:then>
+							<f:else>
+								<span
+									data-tooltip
+									class="entity-not-available has-tip"
+									title="{gaw:planet.structureTechRequirement(structureName: structureName, structureLevel: nextLevel)}"
+								>
+									[{nextLevel}]
+								</span>
+							</f:else>
+						</f:if>
+
+						<br />
+
+						<f:for
+							each="{gaw:planet.requiredResourcesForStructureLevel(structureName: structureName, level: nextLevel)}"
+							as="microunit"
+							key="resourceName"
+						>
+							<f:translate id="resource.short.{resourceName}" />:
+							<f:if condition="{microunit} < {gaw:property(propertyName: resourceName, object: selectedPlanet)}">
+								<f:then>
+									<span class="entity-available">{microunit -> gaw:format.unit()}</span>
+								</f:then>
+								<f:else>
+									<span class="entity-not-available">{microunit -> gaw:format.unit()}</span>
+								</f:else>
+							</f:if>
+						</f:for>
+					</td>
+					<td>
+						<gaw:format.time>
+							<gaw:planet.buildTimeOfStructureByBaseLevel
+								structureName="{structureName}"
+								level="{nextLevel}"
+								baseLevel="{baseLevel}"
+							/>
+						</gaw:format.time>
+					</td>
+					<td>
+						<f:if condition="{selectedPlanet -> gaw:planet.isStructureAvailable(structureName: structureName, structureLevel: nextLevel)}">
 							<f:if condition="{currentStructureBuildQueueLength} < {settings.Game.Planet.maximumStructureQueueLength}">
 								<f:if condition="{gaw:planet.isResourcesAvailableForStructureLevel(planet: selectedPlanet, structureName: structureName, level: nextLevel)}">
+									<span class="right">
 									<f:form action="addStructureToBuildQueue" object="{selectedPlanet}" objectName="planet">
 										<f:form.hidden value="{structureName}" name="structureName" />
-										<f:form.submit value="Ausbau auf {nextLevel}" />
+										<f:form.submit value="Ausbau [{nextLevel}]" />
 									</f:form>
+									</span>
 								</f:if>
 							</f:if>
-						</td>
-					</tr>
-				</f:alias>
-			</f:if>
+						</f:if>
+					</td>
+				</tr>
+			</f:alias>
 		</f:for>
 	</table>
 
 	<table>
 		<thead>
 			<tr>
-				<th colspan="2">
-					Techtree
-				</th>
+				<td></td>
+				<td><f:translate id="resource.iron" /></td>
+				<td><f:translate id="resource.silicon" /></td>
+				<td><f:translate id="resource.xenon" /></td>
+				<td><f:translate id="resource.hydrazine" /></td>
+				<td><f:translate id="resource.energy" /></td>
 			</tr>
 		</thead>
+
 		<tbody>
-			<f:for each="{structureTechTree}" as="requirements" key="structureName">
-				<tr>
+			<tr>
+				<td>Basisproduktion / Stunde</td>
+				<f:for
+					each="{
+							0: 'iron',
+							1: 'silicon',
+							2: 'xenon',
+							3: 'hydrazine',
+							4: 'energy'
+						}"
+					as="resource"
+					>
 					<td>
-						<f:translate id="planet.{structureName}" />
+						{gaw:planet.resourceBasicProductionByResourceTime(resource: resource, time: '3600000000') -> gaw:format.unit()}
 					</td>
-					<td>
-						<ul class="no-bullet no-margin-bottom">
-							<f:for each="{requirements}" as="level" key="requirement">
-								<f:if condition="{selectedPlanet -> gaw:property(propertyName: requirement)} < {level}">
-								<f:then>
-									<li>
-										<f:translate id="planet.{requirement}" />
-										<span class="entity-not-available">[{level}]</span>
-										<span class="entity-available">[{selectedPlanet -> gaw:property(propertyName: requirement)}]</span>
-									</li>
-								</f:then>
-								<f:else>
-									<li>
-										<f:translate id="planet.{requirement}" />
-										<span class="entity-available">[{level}]</span>
-									</li>
-								</f:else>
-							</f:if>
-						</f:for>
-						</ul>
-					</td>
-				</tr>
-			</f:for>
+				</f:for>
+			</tr>
+
+			<tr>
+				<td>Mine / Stunde</td>
+				<f:for
+					each="{
+							0: 'iron',
+							1: 'silicon',
+							2: 'xenon',
+							3: 'hydrazine',
+							4: 'energy'
+						}"
+					as="resource"
+					>
+					<f:alias
+						map="{
+								mineLevel: '{selectedPlanet -> gaw:property(propertyName: \'{resource}Mine\')}'
+							}"
+						>
+						<td>
+							{gaw:planet.resourceMineProductionByResourceLevelTime(resource: resource, level: mineLevel, time: '3600000000') -> gaw:format.unit()}
+							<span class="entity-available">[{mineLevel}]</span>
+						</td>
+					</f:alias>
+				</f:for>
+			</tr>
+
+			<tr>
+				<td>Abzug / Stunde</td>
+				<td></td>
+				<td></td>
+				<td></td>
+				<td>
+						<span class="entity-not-available">
+							-
+							<gaw:format.unit>
+								<gaw:planet.resourceMineProductionByResourceLevelTime
+									resource="energy"
+									level="{selectedPlanet -> gaw:property(propertyName: 'energyMine')}"
+									time="3600000000"
+									/>
+							</gaw:format.unit>
+						</span>
+				</td>
+				<td></td>
+			</tr>
+
+			<tr>
+				<td>Gesamt</td>
+				<f:for
+					each="{
+							0: 'iron',
+							1: 'silicon',
+							2: 'xenon',
+							3: 'hydrazine',
+							4: 'energy'
+						}"
+					as="resource"
+					>
+					<f:alias
+						map="{
+								mineLevel: '{selectedPlanet -> gaw:property(propertyName: \'{resource}Mine\')}'
+								energyMineLevel: '{selectedPlanet -> gaw:property(propertyName: \'energyMine\')}'
+							}"
+						>
+						<td>
+							<f:alias
+								map="{
+										production: '{gaw:planet.resourceFullProductionByResourceLevelTime(resource: resource, level: mineLevel, time: \'3600000000\', energyMineLevel: energyMineLevel)}'
+									}"
+								>
+								<f:if condition="{production} > 0">
+									<f:then>
+											<span class="entity-available">
+												<gaw:format.unit>
+													{production}
+												</gaw:format.unit>
+											</span>
+									</f:then>
+									<f:else>
+											<span class="entity-not-available">
+												<gaw:format.unit>
+													{production}
+												</gaw:format.unit>
+											</span>
+									</f:else>
+								</f:if>
+							</f:alias>
+						</td>
+					</f:alias>
+				</f:for>
+			</tr>
 		</tbody>
 	</table>
 
@@ -227,131 +333,6 @@
 					<span class="entity-available">{selectedPlanet.points}</span>
 				</td>
 			</tr>
-		</tbody>
-	</table>
-
-	<table>
-		<thead>
-			<tr>
-				<td></td>
-				<td><f:translate id="resource.iron" /></td>
-				<td><f:translate id="resource.silicon" /></td>
-				<td><f:translate id="resource.xenon" /></td>
-				<td><f:translate id="resource.hydrazine" /></td>
-				<td><f:translate id="resource.energy" /></td>
-			</tr>
-		</thead>
-		<tbody>
-
-			<tr>
-				<td>Basisproduktion / Stunde</td>
-				<f:for
-					each="{
-						0: 'iron',
-						1: 'silicon',
-						2: 'xenon',
-						3: 'hydrazine',
-						4: 'energy'
-					}"
-					as="resource"
-				>
-					<td>
-						{gaw:planet.resourceBasicProductionByResourceTime(resource: resource, time: '3600000000') -> gaw:format.unit()}
-					</td>
-				</f:for>
-			</tr>
-
-			<tr>
-				<td>Mine / Stunde</td>
-				<f:for
-					each="{
-						0: 'iron',
-						1: 'silicon',
-						2: 'xenon',
-						3: 'hydrazine',
-						4: 'energy'
-					}"
-					as="resource"
-				>
-					<f:alias
-						map="{
-							mineLevel: '{selectedPlanet -> gaw:property(propertyName: \'{resource}Mine\')}'
-						}"
-					>
-						<td>
-							{gaw:planet.resourceMineProductionByResourceLevelTime(resource: resource, level: mineLevel, time: '3600000000') -> gaw:format.unit()}
-							<span class="entity-available">[{mineLevel}]</span>
-						</td>
-					</f:alias>
-				</f:for>
-			</tr>
-
-			<tr>
-				<td>Abzug / Stunde</td>
-				<td></td>
-				<td></td>
-				<td></td>
-				<td>
-					<span class="entity-not-available">
-						-
-						<gaw:format.unit>
-							<gaw:planet.resourceMineProductionByResourceLevelTime
-								resource="energy"
-								level="{selectedPlanet -> gaw:property(propertyName: 'energyMine')}"
-								time="3600000000"
-							/>
-						</gaw:format.unit>
-					</span>
-				</td>
-				<td></td>
-			</tr>
-
-			<tr>
-				<td>Gesamt</td>
-				<f:for
-					each="{
-						0: 'iron',
-						1: 'silicon',
-						2: 'xenon',
-						3: 'hydrazine',
-						4: 'energy'
-					}"
-					as="resource"
-				>
-					<f:alias
-						map="{
-							mineLevel: '{selectedPlanet -> gaw:property(propertyName: \'{resource}Mine\')}'
-							energyMineLevel: '{selectedPlanet -> gaw:property(propertyName: \'energyMine\')}'
-						}"
-					>
-						<td>
-							<f:alias
-								map="{
-									production: '{gaw:planet.resourceFullProductionByResourceLevelTime(resource: resource, level: mineLevel, time: \'3600000000\', energyMineLevel: energyMineLevel)}'
-								}"
-							>
-								<f:if condition="{production} > 0">
-									<f:then>
-										<span class="entity-available">
-											<gaw:format.unit>
-												{production}
-											</gaw:format.unit>
-										</span>
-									</f:then>
-									<f:else>
-										<span class="entity-not-available">
-											<gaw:format.unit>
-												{production}
-											</gaw:format.unit>
-										</span>
-									</f:else>
-								</f:if>
-							</f:alias>
-						</td>
-					</f:alias>
-				</f:for>
-			</tr>
-
 		</tbody>
 	</table>
 </f:section>

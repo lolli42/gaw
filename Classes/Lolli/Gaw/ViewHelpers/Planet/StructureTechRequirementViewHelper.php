@@ -16,10 +16,15 @@ use TYPO3\Flow\Annotations as Flow;
 use Lolli\Gaw\Domain\Model\Planet;
 
 /**
- * Whether a structure can be build according to tech tree.
- * Usually used within f:if
+ * Used in tool tip to show tech requirements of a specific structure level
  */
-class IsStructureAvailableViewHelper extends AbstractViewHelper {
+class StructureTechRequirementViewHelper extends AbstractViewHelper {
+
+	/**
+	 * @var \TYPO3\Flow\I18n\Translator
+	 * @FLOW\Inject
+	 */
+	protected $translator;
 
 	/**
 	 * @Flow\Inject
@@ -28,21 +33,22 @@ class IsStructureAvailableViewHelper extends AbstractViewHelper {
 	protected $planetCalculationService;
 
 	/**
-	 * TRUE if given structure can be build according to tech tree
+	 * Tool tip for structure tech requirement
 	 *
 	 * @param integer $structureName The structure to build
 	 * @param integer $structureLevel The level to build
-	 * @param Planet $planet The planet to check
 	 * @throws Exception
-	 * @return boolean TRUE if structure is available
+	 * @return string
 	 */
-	public function render($structureName, $structureLevel, $planet = NULL) {
-		if ($planet === NULL) {
-			$planet = $this->renderChildren();
+	public function render($structureName, $structureLevel) {
+		$structureLevel = (int)$structureLevel;
+		$techTree = $this->planetCalculationService->getStructureTechTreeRequirements($structureName, $structureLevel);
+		$result = array();
+		foreach ($techTree as $structureName => $requiredLevel) {
+			$id = 'planet.' . $structureName;
+			$translation = $this->translator->translateById($id, array(), NULL, NULL, 'Main', 'Lolli.Gaw');
+			$result[] = $translation . ' ' . $requiredLevel;
 		}
-		if (!($planet instanceof Planet)) {
-			throw new Exception('Not a planet given', 1386596030);
-		}
-		return $this->planetCalculationService->isStructureAvailable($planet, $structureName, $structureLevel);
+		return implode(', ', $result);
 	}
 }

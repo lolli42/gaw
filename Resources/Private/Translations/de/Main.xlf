@@ -61,6 +61,9 @@
 			<trans-unit id="worker.exception.1386789606" xml:space="preserve">
 				<source>Abbruch des Auftrags fehlgeschlagen, die Bauschleife ist leer.</source>
 			</trans-unit>
+			<trans-unit id="worker.exception.1386886693" xml:space="preserve">
+				<source>Bearbeitung des Auftrags fehlgeschlagen, Gebäudeabghängigkeiten nicht erfüllt.</source>
+			</trans-unit>
 		</body>
 	</file>
 </xliff>
