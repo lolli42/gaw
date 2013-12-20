@@ -56,7 +56,24 @@
 					but to be to the right of the nav on larger screens
 				</f:comment>
 				<div class="large-9 columns">
-					<f:flashMessages class="flashmessages" />
+
+					<f:flashMessages as="flashMessages">
+						<f:for each="{flashMessages}" as="flashMessage">
+							<f:if condition="{flashMessage.severity} == 'Warning'">
+								<f:then>
+									<div data-alert class="alert-box alert">
+										{flashMessage}
+									</div>
+								</f:then>
+								<f:else>
+									<div data-alert class="alert-box success">
+										{flashMessage}
+									</div>
+								</f:else>
+							</f:if>
+						</f:for>
+					</f:flashMessages>
+
 					<h2><f:render section="Title" /></h2>
 					<f:render section="Content" />
 				</div>

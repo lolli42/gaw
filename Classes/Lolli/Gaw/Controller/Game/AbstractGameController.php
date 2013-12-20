@@ -90,7 +90,7 @@ abstract class AbstractGameController extends \TYPO3\Flow\Mvc\Controller\ActionC
 				// Fall back to exception message from worker if there is no translation
 				$translation = $result['exceptionMessage'];
 			}
-			$this->addFlashMessage($translation, \TYPO3\Flow\Error\Message::SEVERITY_WARNING);
+			$this->addFlashMessage($translation, '', \TYPO3\Flow\Error\Message::SEVERITY_WARNING);
 		}
 	}
 }
